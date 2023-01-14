@@ -1,3 +1,7 @@
+# Project ignores
+
+datasets_out/
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files
@@ -155,7 +159,7 @@ cmake-build-*/
 *.iws
 
 # IntelliJ
-out/
+datasets_out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
