@@ -1,5 +1,5 @@
 import argparse
-from src.simulator import evolve
+from src.simulator import simulate
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -7,4 +7,4 @@ if __name__ == '__main__':
     parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
     args = parser.parse_args()
 
-    evolve()
+    simulate(None, None, None)
