@@ -25,7 +25,7 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     empty_back = np.array((0,0,0))
     levels = []
     for instruction in instructions:
-        frames_out = evolve(fame_w=width,
+        frames_out = evolve(frame_w=width,
                             frame_h=height,
                             origin_w=instruction.origin_x,
                             origin_h=instruction.origin_y,
@@ -38,4 +38,4 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
         for level in levels:
             pass
             #TODO: overlap
-    return frame_out
+    return frames_out
