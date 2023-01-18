@@ -149,11 +149,14 @@ if __name__ == '__main__':
                         required=True, help="json filename for sequence creation")
     parser.add_argument("-O", "--output-dir", type=str,
                         help="Output directory (e.g. 'datasets_out'")
+    parser.add_argument("-F", "--fps", type=int, default=30,
+                        help="Output sequence fps (e.g. 30)")
     args = parser.parse_args()
 
     frame_width = args.width
     frame_height = args.height
     np_background = parse_background(args.background)
     instructions = parse_json(args.input_json)
+    fps = args.fps
 
-    simulate(frame_width, frame_height, np_background, instructions)
+    simulate(frame_width, frame_height, np_background, instructions, fps)
