@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+import cv2
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -34,7 +35,17 @@ def aggregate_frames(levels: list, background: np.ndarray) -> list:
     return frames_out
 
 
-def simulate(width: int, height: int, background: np.ndarray, instructions: list, fps: int = 30):
+def render_video(video_path:str, frames:list, fps:int):
+    if not video_path.endswith('.mp4'): video_path = video_path + '.mp4'
+    frameSize = frames[0].shape[1], frames[0].shape[0]
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(video_path, fourcc, fps, frameSize)
+    for frame in frames:
+        out.write(frame.astype('uint8'))
+    out.release()
+
+
+def simulate(width: int, height: int, background: np.ndarray, instructions: list, video_out: str=None, fps: int = 30):
     empty_back = np.array((0, 0, 0))
     levels = []
     for instruction in instructions:
@@ -47,4 +58,6 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
                             fps=fps)
         levels.append(frames_out)
     frames_out = aggregate_frames(levels, background)
+    if video_out is not None:
+        render_video(video_out, frames_out, fps)
     return frames_out
