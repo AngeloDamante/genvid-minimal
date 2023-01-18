@@ -26,8 +26,11 @@ def aggregate_frames(levels: list, background: np.ndarray) -> list:
     frames_out = []
     for frame_index in range(max([len(l) for l in levels])):
         for level in levels:
-            pass
-            # TODO: overlap
+            for i, frame in enumerate(level):
+                if i >= len(frames_out):
+                    frames_out.append(background.copy())
+                mask = frame == (0, 0, 0)
+                frames_out[i] = (1 - mask) * frame + frames_out[i] * mask
     return frames_out
 
 
