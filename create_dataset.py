@@ -141,7 +141,7 @@ if __name__ == '__main__':
                         required=True, help="json filename for sequence creation")
     parser.add_argument("-O", "--output-dir", type=str,
                         help="Output directory (e.g. 'datasets_out'")
-    parser.add_argument("-O", "--video", type=str, default=None,
+    parser.add_argument("-V", "--video", type=str, default=None,
                         help="Output video file if wanted (e.g. 'out.mp4'")
     parser.add_argument("-F", "--fps", type=int, default=30,
                         help="Output sequence fps (e.g. 30)")
