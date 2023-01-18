@@ -37,7 +37,7 @@ A simple example can be found by running ` ./run_simple_example.sh `.
 A full example here:
 
 ```
-python3 create_dataset.py   --background="0,0,0" --width=1280 --height=720 --input-json="i2.json"
+python3 create_dataset.py   --background="0,0,0" --width=1280 --height=720 --input-json="i2.json" --fps=30
                             --background="bg1.png"
 ```
 
