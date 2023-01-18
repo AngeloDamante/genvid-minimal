@@ -43,10 +43,17 @@ python3 create_dataset.py   --background="0,0,0" --width=1280 --height=720 --inp
 
 All paths can be passed as static, relative to current dir or relative to own dir:
 
-- routes in **routes** dir
-- figures in **patches** dir
-- video instructions in **sequences** dir
-
+```
+├── create_dataset.py
+├── sequences
+│   └── example_2_figures.json
+├── patches
+│   ├── circle.png
+│   └── square.npy
+├── routes
+│   ├── diag_right.txt
+│   └── letter_l.txt
+```
 ## How it works
 
 A sequence video is made by moving a list of objects (patches like 3D ndarray or an image) inside a frame (video size) with certain settings (sequence json file) following a path (txt route file).
