@@ -5,6 +5,7 @@ import cv2
 import os
 import logging
 from src.simulator import simulate, Instruction
+from src.MovementType import MovementType
 from typing import Tuple
 
 
@@ -60,6 +61,7 @@ def check_exists_with_default_dir(fn: str, default_dir: str):
 
 
 def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
+    allowed_types = ['linear', 'acc', 'dec', 'trap']
     with open(istr_file, 'r') as file:
         route_readed = [l.strip() for l in file.readlines()]
     origin = route_readed[0].split(',')
@@ -70,23 +72,13 @@ def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
         if len(instr) == 0:
             logging.warning("Found istructions line empty, skipping")
             continue
-        dw, dh, tp = int(instr[0]), int(instr[1]), str(instr[2])
-        t0, t1, t2 = 0, 0, 0
-        if tp == 'linear':
-            t1 = int(instr[3])
-        elif tp == 'acc':
-            t0 = int(instr[3])
-        elif tp == 'acc':
-            t2 = int(instr[3])
-        elif tp == 'trap':
-            t0 = int(instr[3])
-            t1 = int(instr[4])
-            t2 = int(instr[5])
-        else:
+        dw, dh, _type, _time = int(instr[0]), int(instr[1]), str(instr[2]), str(instr[3])
+        if _type not in allowed_types:
             logging.error(
-                "Unable to parse step type '{}', use linear|acc,|dec|trap")
+                "Unable to parse step type '{}', use {}".format(_type, allowed_types))
             exit(6)
-        route.append({"dw": dw, "dh": dh, "t0": t0, "t1": t1, "t2": t2})
+        tp = MovementType(_type)
+        route.append([dw, dh, tp, _time])
     return ox, oy, route
 
 
