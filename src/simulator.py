@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import sys
+
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
 from evolver import evolve
@@ -21,8 +22,8 @@ class Instruction:
         self.origin_y = origin_y
 
 
-def simulate(width: int, height: int, background: np.ndarray, instructions: list, fps: int=30):
-    empty_back = np.array((0,0,0))
+def simulate(width: int, height: int, background: np.ndarray, instructions: list, fps: int = 30):
+    empty_back = np.array((0, 0, 0))
     levels = []
     for instruction in instructions:
         frames_out = evolve(frame_w=width,
@@ -37,5 +38,5 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     for frame_index in range(max([len(l) for l in levels])):
         for level in levels:
             pass
-            #TODO: overlap
+            # TODO: overlap
     return frames_out
