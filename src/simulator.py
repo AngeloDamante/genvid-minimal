@@ -22,6 +22,15 @@ class Instruction:
         self.origin_y = origin_y
 
 
+def aggregate_frames(levels: list, background: np.ndarray) -> list:
+    frames_out = []
+    for frame_index in range(max([len(l) for l in levels])):
+        for level in levels:
+            pass
+            # TODO: overlap
+    return frames_out
+
+
 def simulate(width: int, height: int, background: np.ndarray, instructions: list, fps: int = 30):
     empty_back = np.array((0, 0, 0))
     levels = []
@@ -34,9 +43,5 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
                             route=instruction.route,
                             fps=fps)
         levels.append(frames_out)
-    frames_out = []
-    for frame_index in range(max([len(l) for l in levels])):
-        for level in levels:
-            pass
-            # TODO: overlap
+    frames_out = aggregate_frames(levels, background)
     return frames_out
