@@ -58,4 +58,4 @@ All paths can be passed as static, relative to current dir or relative to own di
 
 A sequence video is made by moving a list of objects (patches like 3D ndarray or an image) inside a frame (video size) with certain settings (sequence json file) following a path (txt route file).
 
-TODO: add diagram image
+![](repo_img/Diagrams.png)
