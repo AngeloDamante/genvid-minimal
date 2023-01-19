@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from typing import Tuple
 from MovementType import MovementType
-from math import ceil
+from math import ceil, floor
 
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -144,10 +144,10 @@ class Evolver:
                 frame with apllied patch
         """
         # compute coord
-        r_i = int(x[0] - ceil(patch.shape[0] / 2))
-        r_f = int(x[0] + ceil(patch.shape[0] / 2))
-        c_i = int(x[1] - ceil(patch.shape[1] / 2))
-        c_f = int(x[1] + ceil(patch.shape[1] / 2))
+        r_i = int(x[0] - (patch.shape[0] / 2))
+        r_f = int(x[0] + (patch.shape[0] / 2))
+        c_i = int(x[1] - (patch.shape[1] / 2))
+        c_f = int(x[1] + (patch.shape[1] / 2))
 
         # fix frame indices to handle edges
         fr_i = max(0, r_i)
@@ -158,7 +158,7 @@ class Evolver:
         # FIXME
         # fix path indices to handle edges
         pc_f = patch.shape[1] - (c_f - fc_f)
-        pc_i = fc_i - c_i 
+        pc_i = fc_i - c_i
         pr_f = patch.shape[0] - (r_f - fr_f)
         pr_i = fr_i - r_i
 
