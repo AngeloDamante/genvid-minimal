@@ -6,6 +6,6 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 sys.path.insert(0, __location__)
 
 class MovementType(Enum):
-    mru = 'mru'
+    urm = 'urm'
     uarm = 'uarm'
     trap = 'trap'
