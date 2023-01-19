@@ -4,14 +4,14 @@ import cv2
 
 frame_w = 720
 frame_h = 1280
-origin_w = 200
-origin_h = 400
-patch = cv2.imread('/home/angelo/Development/uni/genvid-minimal/patches/circle.png')
+origin_w = 0
+origin_h = 0
+patch = cv2.imread('../patches/circle.png')
 fps = 30
 
 
-route = [[300, 500, MovementType.mru, 1000], 
-         [400, 500, MovementType.mru, 3000],
+route = [[300, 500, MovementType.urm, 1000],
+         [400, 500, MovementType.urm, 3000],
          [600, 700, MovementType.uarm, 5000],
          [800, 750, MovementType.uarm, 2000]]
 

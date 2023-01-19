@@ -154,8 +154,12 @@ class Evolver:
         
         # FIXME
         # fix path indices to handle edges
-        pr_i = max(0, fr_f - fr_i)
+        pc_f = patch.shape[1] -(c_f - fc_f)
+        pc_i = fc_i - c_i
+        pr_f = patch.shape[0] -(r_f - fr_f)
+        pr_i = fr_i - r_i
 
         # patch
-        frame[fr_i:fr_f, fc_i:fc_f, :] = patch
+        frame[fr_i:fr_f, fc_i:fc_f, :] = patch[pr_i:pr_f, pc_i:pc_f, :]
+        #print(frame[:,:,2])
         return frame
