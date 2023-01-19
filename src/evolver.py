@@ -65,7 +65,7 @@ class Evolver:
             num_frames = int(self.fps * t_f)
             self.v = (dest - self.origin) / t_f
 
-            if command == MovementType.mru:
+            if command == MovementType.urm:
                 self._compute_linear(num_frames)
 
             elif command == MovementType.uarm:
