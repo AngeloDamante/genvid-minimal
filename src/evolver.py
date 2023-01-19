@@ -66,14 +66,11 @@ class Evolver:
             # compute velocity
             num_frames = int(self.fps * t_f)
             self.v = (dest - self.origin) / t_f
-
             if command.value == MovementType.urm.value:
                 self._compute_linear(num_frames)
-
             elif command.value == MovementType.uarm.value:
                 a = (dest - self.origin) / (t_f ** 2)
                 self._compute_acc(num_frames, a)
-
             elif command.value == MovementType.trap.value:
                 # TODO
                 pass
@@ -83,7 +80,6 @@ class Evolver:
 
             # update origin for next command
             self.origin = dest
-
         return self.frames, self.gth
 
     def _compute_linear(self, num_frames: int) -> None:
@@ -135,7 +131,7 @@ class Evolver:
     def apply_patch(frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
         """ To Apply patch in desired frame.
 
-            Args: 
+            Args:
                 frame(ndarray)
                 patch(ndarray)
                 x(ndarray): center of patch in frame reference
@@ -144,10 +140,14 @@ class Evolver:
                 frame with apllied patch
         """
         # compute coord
-        r_i = int(x[0] - (patch.shape[0] / 2))
-        r_f = int(x[0] + (patch.shape[0] / 2))
-        c_i = int(x[1] - (patch.shape[1] / 2))
-        c_f = int(x[1] + (patch.shape[1] / 2))
+        r_i = int(x[0] - int(patch.shape[0] / 2))
+        r_f = int(x[0] + int(patch.shape[0] / 2) + 1)
+        c_i = int(x[1] - int(patch.shape[1] / 2))
+        c_f = int(x[1] + int(patch.shape[1] / 2) + 1)
+
+        # out of border
+        if r_i >= frame.shape[0] or r_f <= 0 or c_i >= frame.shape[1] or c_f <= 0:
+            return frame
 
         # fix frame indices to handle edges
         fr_i = max(0, r_i)
