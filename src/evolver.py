@@ -140,6 +140,7 @@ class Evolver:
                 frame with apllied patch
         """
         # compute coord
+        x = np.floor(x)
         r_i = int(x[0] - int(patch.shape[0] / 2))
         r_f = int(x[0] + int(patch.shape[0] / 2) + 1)
         c_i = int(x[1] - int(patch.shape[1] / 2))
