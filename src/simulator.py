@@ -6,7 +6,7 @@ import logging
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
-from evolver import evolve
+from evolver import Evolver
 
 
 class Instruction:
@@ -67,13 +67,8 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     levels = []
     ann_out = []
     for instruction in instructions:
-        frames_out, annotations = evolve(frame_w=width,
-                            frame_h=height,
-                            origin_w=instruction.origin_x,
-                            origin_h=instruction.origin_y,
-                            patch=instruction.patch,
-                            route=instruction.route,
-                            fps=fps)
+        evolver = Evolver(width, height, instruction.origin_x, instruction.origin_y, instruction.patch, fps)
+        frames_out, annotations = evolver.compute_evolutions(instruction.route)
         levels.append(frames_out)
         ann_out.append([(instruction.label, ann) for ann in annotations])
     frames_out = aggregate_frames(levels, background)

@@ -60,6 +60,18 @@ def check_exists_with_default_dir(fn: str, default_dir: str):
     return path
 
 
+def txt_to_MovementType(_type: str) -> MovementType:
+    if _type == 'linear':
+        return MovementType.urm
+    elif _type == 'acc':
+        return MovementType.uarm
+    elif _type == 'trap':
+        return MovementType.trap
+    else:
+        logging.error("Unable to parse movement type {}".format(_type))
+        exit(7)
+
+
 def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
     allowed_types = ['linear', 'acc', 'dec', 'trap']
     with open(istr_file, 'r') as file:
@@ -77,8 +89,8 @@ def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
             logging.error(
                 "Unable to parse step type '{}', use {}".format(_type, allowed_types))
             exit(6)
-        tp = MovementType(_type)
-        route.append([dw, dh, tp, _time])
+        tp = txt_to_MovementType(_type)
+        route.append([dw, dh, tp, int(_time)])
     return ox, oy, route
 
 
@@ -139,7 +151,7 @@ if __name__ == '__main__':
                         help="Background like color RGB or filename (e.g. '0,0,255', background_1.png)")
     parser.add_argument("-I", "--input-json", type=str,
                         required=True, help="json filename for sequence creation")
-    parser.add_argument("-O", "--output-dir", type=str,
+    parser.add_argument("-O", "--output-dir", type=str, default="datasets_out",
                         help="Output directory (e.g. 'datasets_out'")
     parser.add_argument("-V", "--video", type=str, default=None,
                         help="Output video file if wanted (e.g. 'out.mp4'")
