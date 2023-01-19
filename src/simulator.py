@@ -26,13 +26,15 @@ class Instruction:
 
 def aggregate_frames(levels: list, background: np.ndarray) -> list:
     frames_out = []
+    zeros_ = np.array([0,0,0])
     for frame_index in range(max([len(l) for l in levels])):
-        for level in levels:
-            for i, frame in enumerate(level):
-                if i >= len(frames_out):
-                    frames_out.append(background.copy())
-                mask = frame == (0, 0, 0)
-                frames_out[i] = (1 - mask) * frame + frames_out[i] * mask
+        base_frame = background.copy()
+        for i in range(len(levels)):
+            if frame_index < len(levels[i]):
+                frame = levels[i][frame_index]
+                mask = frame == zeros_
+                base_frame = (1 - mask) * frame + base_frame * mask
+        frames_out.append(base_frame)
     return frames_out
 
 
@@ -51,7 +53,9 @@ def build_datasets_dir(base_dir):
     i = 0
     def build(d, index): return os.path.join(d, "seq{}".format(index))
     while os.path.exists(build(base_dir, i)): i += 1
-    return build(base_dir, i)
+    dir = build(base_dir, i)
+    os.makedirs(dir)
+    return dir
 
 
 def create_annotation(annotation_ul_dr, w:int, h:int):
@@ -74,7 +78,7 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     frames_out = aggregate_frames(levels, background)
     for i in range(len(frames_out)):
         fn = os.path.join(dataset_dir, "{:010d}".format(i))
-        np.save(frames_out[i], fn + ".jpg")
+        np.save(fn + ".jpg", frames_out[i])
         with open(fn + ".txt", 'w') as file:
             for j in range(len(ann_out)):
                 label, ann = ann_out[j][i]
