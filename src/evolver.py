@@ -106,3 +106,26 @@ class Evolver:
             # save
             self.frames.append(frame)
             self.gth.append(x)
+            
+            
+    def apply_patch(self, frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
+        """ To Apply patch in desired frame.
+
+            Args: 
+                frame(ndarray)
+                patch(ndarray)
+                x(ndarray): center of patch in frame reference
+            
+            Return:
+                frame with apllied patch
+        """
+        # compute coord
+        r_i = int(x[0] - patch.shape[0] / 2)
+        r_f = int(x[0] + patch.shape[0] / 2)
+        c_i = int(x[1] - patch.shape[1] / 2)
+        c_f = int(x[1] + patch.shape[1] / 2)
+
+        # TODO: fix path indices to handle edges
+        # patch
+        frame[r_i:r_f, c_i:c_f, :] = patch
+        return frame
