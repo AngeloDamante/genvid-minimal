@@ -1,37 +1,26 @@
 import sys
 import os
 import logging
-import cv2
 import numpy as np
 from typing import Tuple
 from MovementType import MovementType
-from math import ceil, floor
 
-__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+__location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
 
 
 class Evolver:
-    """ Evolver to implement custom video with patch applied.
+    """Evolver to implement custom video with patch applied.
 
-        Attributes:
-            frame_w(int)  np
-            frame_h(int)
-            origin_w(int): origin along y-axis
-            origin_h(int): origin along x-axis
-            patch(np.ndarray): to apply to the frame
-            fps(int)
+    Attributes:
+        frame_w(int)
+        frame_h(int)
+        origin(ndarray)
+        patch(np.ndarray)
+        fps(int)
     """
 
-    def __init__(self,
-                 frame_w: int,
-                 frame_h: int,
-                 origin_w: int,
-                 origin_h: int,
-                 patch: np.ndarray,
-                 fps: int) -> None:
-
+    def __init__(self, frame_w: int, frame_h: int, origin_w: int, origin_h: int, patch: np.ndarray, fps: int) -> None:
         # input
         self.frame_w = frame_w
         self.frame_h = frame_h
@@ -58,7 +47,6 @@ class Evolver:
                 gth(list): list of path center coord in the frame
         """
         for (d_w, d_h, command, time_ms) in route:
-
             # compute dest and final time [s]
             dest = np.array([d_h, d_w], dtype=float)
             t_f = time_ms / 1000
@@ -83,61 +71,55 @@ class Evolver:
         return self.frames, self.gth
 
     def _compute_linear(self, num_frames: int) -> None:
-        """ Compute frames with uniformly rectilinear motion (URM) for patch.
+        """Compute frames with uniformly rectilinear motion (URM) for patch.
 
-            This method updates frames and gth attributes.
+        This method updates frames and gth attributes.
 
-            Args:
-                num_frames(int): number of desired frames 
+        Args:
+            num_frames(int): number of desired frames
         """
         for i in range(num_frames + 1):
-            frame = np.zeros((self.frame_h, self.frame_w, 3))
-
             # motion law
             t = i * self.step
             x = self.origin + self.v * t
 
+            # save frame
+            frame = np.zeros((self.frame_h, self.frame_w, 3))
             frame = self.apply_patch(frame, self.patch, x)
-
-            # save
             self.frames.append(frame)
             self.gth.append(x)
 
     def _compute_acc(self, num_frames: int, a: float) -> None:
-        """ Compute frames with (UARM) motion law.
+        """Compute frames with (UARM) motion law.
 
-            This method updates frames and gth attributes.
+        This method updates frames and gth attributes.
 
-            Args:
-                num_frames(int): number of desired frames
-                a(float): acceleration
+        Args:
+            num_frames(int): number of desired frames
+            a(float): acceleration
         """
         for i in range(num_frames + 1):
-            frame = np.zeros((self.frame_h, self.frame_w, 3))
-
             # motion law
             t = i * self.step
-            # x = self.origin + self.v*t + 0.5 * a * (t**2)
-            # x = self.origin + 0.5 * a * (t**2)
             x = self.origin + a * (t ** 2)
 
+            # save frame
+            frame = np.zeros((self.frame_h, self.frame_w, 3))
             frame = self.apply_patch(frame, self.patch, x)
-
-            # save
             self.frames.append(frame)
             self.gth.append(x)
 
     @staticmethod
     def apply_patch(frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
-        """ To Apply patch in desired frame.
+        """To Apply patch in desired frame.
 
-            Args:
-                frame(ndarray)
-                patch(ndarray)
-                x(ndarray): center of patch in frame reference
+        Args:
+            frame(ndarray)
+            patch(ndarray)
+            x(ndarray): center of patch in frame reference
 
-            Return:
-                frame with apllied patch
+        Return:
+            frame with apllied patch
         """
         # compute coord
         x = np.floor(x)
@@ -156,7 +138,6 @@ class Evolver:
         fc_i = max(0, c_i)
         fc_f = min(frame.shape[1], c_f)
 
-        # FIXME
         # fix path indices to handle edges
         pc_f = patch.shape[1] - (c_f - fc_f)
         pc_i = fc_i - c_i
@@ -165,5 +146,4 @@ class Evolver:
 
         # patch
         frame[fr_i:fr_f, fc_i:fc_f, :] = patch[pr_i:pr_f, pc_i:pc_f, :]
-
         return frame
