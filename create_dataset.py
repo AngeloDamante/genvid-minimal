@@ -153,5 +153,6 @@ if __name__ == '__main__':
     instructions = parse_json(args.input_json)
     fps = args.fps
     video_out = args.video
+    annotations_dir = args.output_dir
 
-    simulate(frame_width, frame_height, np_background, instructions, video_out, fps)
+    simulate(frame_width, frame_height, np_background, instructions, annotations_dir, video_out, fps)

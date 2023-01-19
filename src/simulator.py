@@ -2,6 +2,7 @@ import numpy as np
 import os
 import sys
 import cv2
+import logging
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -45,11 +46,28 @@ def render_video(video_path:str, frames:list, fps:int):
     out.release()
 
 
-def simulate(width: int, height: int, background: np.ndarray, instructions: list, video_out: str=None, fps: int = 30):
+def build_datasets_dir(base_dir):
+    if not os.path.exists(base_dir): os.makedirs(base_dir)
+    i = 0
+    def build(d, index): return os.path.join(d, "seq{}".format(index))
+    while os.path.exists(build(base_dir, i)): i += 1
+    return build(base_dir, i)
+
+
+def create_annotation(annotation_ul_dr, w:int, h:int):
+    uw, uh, dw, dh = annotation_ul_dr
+    # [cx, cy, w, h] relative to w, h
+    return [((dw+uw)/2.0)/w, ((dh+uh)/2.0)/h, (dw-uw)/w, (dh-uh)/h]
+
+
+def simulate(width: int, height: int, background: np.ndarray, instructions: list, dataset_dir: str, video_out: str=None, fps: int = 30):
     empty_back = np.array((0, 0, 0))
+    dataset_dir = build_datasets_dir(dataset_dir)
+    logging.info("Saving annotations in {}".format(dataset_dir))
     levels = []
+    ann_out = []
     for instruction in instructions:
-        frames_out = evolve(frame_w=width,
+        frames_out, annotations = evolve(frame_w=width,
                             frame_h=height,
                             origin_w=instruction.origin_x,
                             origin_h=instruction.origin_y,
@@ -57,7 +75,16 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
                             route=instruction.route,
                             fps=fps)
         levels.append(frames_out)
+        ann_out.append([(instruction.label, ann) for ann in annotations])
     frames_out = aggregate_frames(levels, background)
+    for i in range(len(frames_out)):
+        fn = os.path.join(dataset_dir, "{:010d}".format(i))
+        np.save(frames_out[i], fn + ".jpg")
+        with open(fn + ".txt", 'w') as file:
+            for j in range(len(ann_out)):
+                label, ann = ann_out[j][i]
+                ann_yolo = create_annotation(ann, width, height)
+                file.write("{} {} {} {} {}".format(label, ann_yolo[0], ann_yolo[1], ann_yolo[2], ann_yolo[3]))
     if video_out is not None:
         render_video(video_out, frames_out, fps)
     return frames_out
