@@ -70,10 +70,14 @@ class Evolver:
 
             elif command == "acc":
                 # TODO
+                a = (dest - self.origin) / (t_f ** 2)
+                self._compute_acc(num_frames, a)
                 pass
 
             elif command == "dec":
                 # TODO
+                a = (dest - self.origin) / (t_f ** 2)
+                self._compute_acc(num_frames, -a)
                 pass
 
             elif command == MovementType.trap:
@@ -90,7 +94,9 @@ class Evolver:
 
     def _compute_linear(self, num_frames: int) -> None:
         """ Compute frames with uniformly rectilinear motion for patch.
-        
+
+            This method updates frames and gth attributes.
+
             Args:
                 num_frames(int): number of desired frames 
         """
@@ -106,8 +112,30 @@ class Evolver:
             # save
             self.frames.append(frame)
             self.gth.append(x)
-            
-            
+
+    def _compute_acc(self, num_frames: int, a: float) -> None:
+        """ Compute frames with (UARM) motion law.
+
+            This method updates frames and gth attributes.
+
+            Args:
+                num_frames(int): number of desired frames
+                a(float): acceleration
+        """
+        for i in range(num_frames + 1):
+            frame = np.zeros((self.frame_h, self.frame_w, 3))
+
+            # motion law
+            t = i * self.step
+            # x = self.origin + self.v*t + 0.5 * a * (t**2)
+            x = self.origin + 0.5 * a * (t**2)
+
+            frame = self.apply_patch(frame, self.patch, x)
+
+            # save
+            self.frames.append(frame)
+            self.gth.append(x)
+
     def apply_patch(self, frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
         """ To Apply patch in desired frame.
 
@@ -115,7 +143,7 @@ class Evolver:
                 frame(ndarray)
                 patch(ndarray)
                 x(ndarray): center of patch in frame reference
-            
+
             Return:
                 frame with apllied patch
         """
@@ -126,6 +154,11 @@ class Evolver:
         c_f = int(x[1] + patch.shape[1] / 2)
 
         # TODO: fix path indices to handle edges
+        r_i = max(0, r_i)
+        r_f = min(frame.shape[0], r_f)
+        c_i = max(0, c_i)
+        c_f = min(frame.shape[1], c_f)
+
         # patch
         frame[r_i:r_f, c_i:c_f, :] = patch
         return frame
