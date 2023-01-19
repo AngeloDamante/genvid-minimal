@@ -65,20 +65,12 @@ class Evolver:
             num_frames = int(self.fps * t_f)
             self.v = (dest - self.origin) / t_f
 
-            if command == "linear":
+            if command == MovementType.mru:
                 self._compute_linear(num_frames)
 
-            elif command == "acc":
-                # TODO
+            elif command == MovementType.uarm:
                 a = (dest - self.origin) / (t_f ** 2)
                 self._compute_acc(num_frames, a)
-                pass
-
-            elif command == "dec":
-                # TODO
-                a = (dest - self.origin) / (t_f ** 2)
-                self._compute_acc(num_frames, -a)
-                pass
 
             elif command == MovementType.trap:
                 # TODO
@@ -93,7 +85,7 @@ class Evolver:
         return self.frames, self.gth
 
     def _compute_linear(self, num_frames: int) -> None:
-        """ Compute frames with uniformly rectilinear motion for patch.
+        """ Compute frames with uniformly rectilinear motion (URM) for patch.
 
             This method updates frames and gth attributes.
 
@@ -128,7 +120,8 @@ class Evolver:
             # motion law
             t = i * self.step
             # x = self.origin + self.v*t + 0.5 * a * (t**2)
-            x = self.origin + 0.5 * a * (t**2)
+            # x = self.origin + 0.5 * a * (t**2)
+            x = self.origin + a * (t**2)
 
             frame = self.apply_patch(frame, self.patch, x)
 
@@ -153,12 +146,16 @@ class Evolver:
         c_i = int(x[1] - patch.shape[1] / 2)
         c_f = int(x[1] + patch.shape[1] / 2)
 
-        # TODO: fix path indices to handle edges
-        r_i = max(0, r_i)
-        r_f = min(frame.shape[0], r_f)
-        c_i = max(0, c_i)
-        c_f = min(frame.shape[1], c_f)
+        # fix frame indices to handle edges
+        fr_i = max(0, r_i)
+        fr_f = min(frame.shape[0], r_f)
+        fc_i = max(0, c_i)
+        fc_f = min(frame.shape[1], c_f)
+        
+        # FIXME
+        # fix path indices to handle edges
+        pr_i = max(0, fr_f - fr_i)
 
         # patch
-        frame[r_i:r_f, c_i:c_f, :] = patch
+        frame[fr_i:fr_f, fc_i:fc_f, :] = patch
         return frame

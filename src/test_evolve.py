@@ -1,4 +1,5 @@
 from evolver import Evolver
+from MovementType import MovementType
 import cv2
 
 frame_w = 720
@@ -9,14 +10,20 @@ patch = cv2.imread('/home/angelo/Development/uni/genvid-minimal/patches/circle.p
 fps = 30
 
 
-route = [[300, 500, "linear", 1000], 
-         [400, 500, "linear", 3000],
-         [600, 700, "acc", 2000],
-         [600, 700, "acc", 2000]]
+route = [[300, 500, MovementType.mru, 1000], 
+         [400, 500, MovementType.mru, 3000],
+         [600, 700, MovementType.uarm, 5000],
+         [800, 750, MovementType.uarm, 2000]]
+
+# route = [[300, 500, MovementType.mru, 1000], 
+#          [400, 500, MovementType.mru, 3000]]
+
+# route = [[800, 750, MovementType.acc, 2000]]
 
 evolver = Evolver(frame_w, frame_h, origin_w, origin_h, patch, fps)
 frames, gth = evolver.compute_evolutions(route)
 
+# print(gth)
 
 # create video
 frameSize = frames[0].shape[1], frames[0].shape[0]
