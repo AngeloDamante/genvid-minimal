@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from typing import Tuple
 from MovementType import MovementType
+from math import ceil
+
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -14,7 +16,7 @@ class Evolver:
     """ Evolver to implement custom video with patch applied.
 
         Attributes:
-            frame_w(int) 
+            frame_w(int)  np
             frame_h(int)
             origin_w(int): origin along y-axis
             origin_h(int): origin along x-axis
@@ -65,14 +67,14 @@ class Evolver:
             num_frames = int(self.fps * t_f)
             self.v = (dest - self.origin) / t_f
 
-            if command == MovementType.urm:
+            if command.value == MovementType.urm.value:
                 self._compute_linear(num_frames)
 
-            elif command == MovementType.uarm:
+            elif command.value == MovementType.uarm.value:
                 a = (dest - self.origin) / (t_f ** 2)
                 self._compute_acc(num_frames, a)
 
-            elif command == MovementType.trap:
+            elif command.value == MovementType.trap.value:
                 # TODO
                 pass
             else:
@@ -121,7 +123,7 @@ class Evolver:
             t = i * self.step
             # x = self.origin + self.v*t + 0.5 * a * (t**2)
             # x = self.origin + 0.5 * a * (t**2)
-            x = self.origin + a * (t**2)
+            x = self.origin + a * (t ** 2)
 
             frame = self.apply_patch(frame, self.patch, x)
 
@@ -129,7 +131,8 @@ class Evolver:
             self.frames.append(frame)
             self.gth.append(x)
 
-    def apply_patch(self, frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
+    @staticmethod
+    def apply_patch(frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
         """ To Apply patch in desired frame.
 
             Args: 
@@ -141,25 +144,25 @@ class Evolver:
                 frame with apllied patch
         """
         # compute coord
-        r_i = int(x[0] - patch.shape[0] / 2)
-        r_f = int(x[0] + patch.shape[0] / 2)
-        c_i = int(x[1] - patch.shape[1] / 2)
-        c_f = int(x[1] + patch.shape[1] / 2)
+        r_i = int(x[0] - ceil(patch.shape[0] / 2))
+        r_f = int(x[0] + ceil(patch.shape[0] / 2))
+        c_i = int(x[1] - ceil(patch.shape[1] / 2))
+        c_f = int(x[1] + ceil(patch.shape[1] / 2))
 
         # fix frame indices to handle edges
         fr_i = max(0, r_i)
         fr_f = min(frame.shape[0], r_f)
         fc_i = max(0, c_i)
         fc_f = min(frame.shape[1], c_f)
-        
+
         # FIXME
         # fix path indices to handle edges
-        pc_f = patch.shape[1] -(c_f - fc_f)
-        pc_i = fc_i - c_i
-        pr_f = patch.shape[0] -(r_f - fr_f)
-        pr_i = fr_i - r_i
+        pc_f = patch.shape[1] - (c_f - fc_f)
+        pc_i = fc_i - c_i - 1
+        pr_f = patch.shape[0] - (r_f - fr_f)
+        pr_i = fr_i - r_i - 1
 
         # patch
         frame[fr_i:fr_f, fc_i:fc_f, :] = patch[pr_i:pr_f, pc_i:pc_f, :]
-        #print(frame[:,:,2])
+
         return frame
