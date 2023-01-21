@@ -3,7 +3,7 @@ import os
 import logging
 import numpy as np
 from typing import Tuple
-from MovementType import MovementType
+from src.MovementType import MovementType
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -35,6 +35,9 @@ class Evolver:
         # output
         self.frames = []
         self.gth = []
+
+    def update_origin(self, origin_w: int, origin_h: int) -> None:
+        self.origin = np.array([origin_h, origin_w], dtype=float)
 
     def compute_evolutions(self, route: list) -> Tuple[list, list]:
         """ Compute evolutions for each steps in route list.
@@ -145,5 +148,6 @@ class Evolver:
         pr_i = fr_i - r_i
 
         # patch
+        frame = frame.copy()
         frame[fr_i:fr_f, fc_i:fc_f, :] = patch[pr_i:pr_f, pc_i:pc_f, :]
         return frame
