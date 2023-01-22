@@ -4,6 +4,7 @@ import logging
 import numpy as np
 from typing import Tuple
 from src.MovementType import MovementType
+from src.motion_law import urm, uarm, trapezoidal_profile
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -29,7 +30,7 @@ class Evolver:
         self.fps = fps
 
         # internal states
-        self.v = 0
+        self.v = 1
         self.step = float(1 / self.fps)
 
         # output
@@ -39,81 +40,62 @@ class Evolver:
     def update_origin(self, origin_w: int, origin_h: int) -> None:
         self.origin = np.array([origin_h, origin_w], dtype=float)
 
+    def update_patch(self, patch: np.ndarray) -> None:
+        self.patch = patch
+
+    def reset(self) -> None:
+        self.v = 1
+        self.frames.clear()
+        self.gth.clear()
+
     def compute_evolutions(self, route: list) -> Tuple[list, list]:
-        """ Compute evolutions for each steps in route list.
+        """Compute evolutions for each steps in route list.
 
-            Args:
-                route(list): list of steps for patch applied
+        Args:
+            route(list): list of steps for patch applied
 
-            Returns:
-                frames(list): list of frames to animate the path
-                gth(list): list of path center coord in the frame
+        Returns:
+            frames(list): list of frames to animate the path
+            gth(list): list of path center coord in the frame
         """
         for (d_w, d_h, command, time_ms) in route:
-            # compute dest and final time [s]
+            #
             dest = np.array([d_h, d_w], dtype=float)
             t_f = time_ms / 1000
-
-            # compute velocity
             num_frames = int(self.fps * t_f)
-            self.v = (dest - self.origin) / t_f
-            if command.value == MovementType.urm.value:
-                self._compute_linear(num_frames)
-            elif command.value == MovementType.uarm.value:
-                a = (dest - self.origin) / (t_f ** 2)
-                self._compute_acc(num_frames, a)
-            elif command.value == MovementType.trap.value:
-                # TODO
-                pass
-            else:
-                logging.error("Wrong type!")
-                pass
 
-            # update origin for next command
+            # initializations
+            x = np.zeros(2)
+            empty_frame = np.zeros((self.frame_h, self.frame_w, 3))
+
+            # velocity and acceleratione to compute motion laws
+            vc = np.sign((dest - self.origin) / t_f)
+            vc = vc * np.random.uniform(abs(dest - self.origin) / t_f + 0.001, 2 * abs(dest - self.origin) / t_f)
+            self.v = (dest - self.origin) / t_f
+            acc = 2 * (dest - self.origin - self.v * t_f) / (t_f ** 2)
+
+            # compute new x-point with selected motion law for each frame
+            for i in range(num_frames):
+                t = i * self.step
+                if command.value == MovementType.urm.value:
+                    x[0] = urm(self.origin[0], self.v[0], t)
+                    x[1] = urm(self.origin[1], self.v[1], t)
+                elif command.value == MovementType.uarm.value:
+                    x[0] = uarm(self.origin[0], self.v[0], acc[0], t)
+                    x[1] = uarm(self.origin[1], self.v[1], acc[1], t)
+                elif command.value == MovementType.trap.value:
+                    _, x[0] = trapezoidal_profile(self.origin[0], dest[0], t_f, vc[0], t)
+                    _, x[1] = trapezoidal_profile(self.origin[1], dest[1], t_f, vc[1], t)
+                else:
+                    logging.error("Wrong type!")
+                frame, gth = self.apply_patch(empty_frame, self.patch, x)
+                self.frames.append(frame)
+                self.gth.append(gth)
             self.origin = dest
         return self.frames, self.gth
 
-    def _compute_linear(self, num_frames: int) -> None:
-        """Compute frames with uniformly rectilinear motion (URM) for patch.
-
-        This method updates frames and gth attributes.
-
-        Args:
-            num_frames(int): number of desired frames
-        """
-        for i in range(num_frames + 1):
-            # motion law
-            t = i * self.step
-            x = self.origin + self.v * t
-
-            # save frame
-            frame = np.zeros((self.frame_h, self.frame_w, 3))
-            frame = self.apply_patch(frame, self.patch, x)
-            self.frames.append(frame)
-            self.gth.append(x)
-
-    def _compute_acc(self, num_frames: int, a: float) -> None:
-        """Compute frames with (UARM) motion law.
-
-        This method updates frames and gth attributes.
-
-        Args:
-            num_frames(int): number of desired frames
-            a(float): acceleration
-        """
-        for i in range(num_frames + 1):
-            # motion law
-            t = i * self.step
-            x = self.origin + a * (t ** 2)
-
-            # save frame
-            frame = np.zeros((self.frame_h, self.frame_w, 3))
-            frame = self.apply_patch(frame, self.patch, x)
-            self.frames.append(frame)
-            self.gth.append(x)
-
     @staticmethod
-    def apply_patch(frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> np.ndarray:
+    def apply_patch(frame: np.ndarray, patch: np.ndarray, x: np.ndarray) -> Tuple[np.ndarray, list]:
         """To Apply patch in desired frame.
 
         Args:
@@ -121,8 +103,9 @@ class Evolver:
             patch(ndarray)
             x(ndarray): center of patch in frame reference
 
-        Return:
-            frame with apllied patch
+        Returns:
+            frame with applied patch and the coord where It is applied
+            [top_left_x, top_left_y, bottom_right_x, bottom_right_y]
         """
         # compute coord
         x = np.floor(x)
@@ -133,7 +116,7 @@ class Evolver:
 
         # out of border
         if r_i >= frame.shape[0] or r_f <= 0 or c_i >= frame.shape[1] or c_f <= 0:
-            return frame
+            return frame, [-1, -1, -1, -1]
 
         # fix frame indices to handle edges
         fr_i = max(0, r_i)
@@ -150,4 +133,4 @@ class Evolver:
         # patch
         frame = frame.copy()
         frame[fr_i:fr_f, fc_i:fc_f, :] = patch[pr_i:pr_f, pc_i:pc_f, :]
-        return frame
+        return frame, [fr_i, fc_i, fr_f - 1, fc_f - 1]
