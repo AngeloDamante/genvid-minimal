@@ -67,10 +67,11 @@ class TestMotionLaw(unittest.TestCase):
     def test_trapezoidal_failure(self):
         vc = np.random.uniform(2 * abs(dest - origin) / tf, 2 * abs(dest - origin) / tf + 1)
         flag = [False, False]
-        flag[0], _ = trapezoidal_profile(origin[0], dest[0], tf, vc[0], 1)
-        flag[1], _ = trapezoidal_profile(origin[1], dest[1], tf, vc[1], 1)
+        x = np.zeros(2)
+        flag[0], x[0] = trapezoidal_profile(origin[0], dest[0], tf, vc[0], 1)
+        flag[1], x[1] = trapezoidal_profile(origin[1], dest[1], tf, vc[1], 1)
         self.assertEqual(all(flag), False)
-        pass
+        self.assertEqual((x[0], x[1]), (origin[0], origin[1]))
 
 
 if __name__ == '__main__':
