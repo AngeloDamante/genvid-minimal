@@ -34,9 +34,9 @@ def aggregate_frames(levels: list, background: np.ndarray) -> list:
         for i in range(len(levels)):
             if frame_index < len(levels[i]):
                 frame = levels[i][frame_index]
-                mask = frame == zeros_
-                mask_inverse = (1 - mask) == zeros_
-                base_frame = mask_inverse * frame + base_frame * mask
+                x, y = np.where(np.sum(frame, axis=2) != 0)
+                for i, j in zip(x, y):
+                    base_frame[i, j, :] = frame[i, j, :]
         frames_out.append(base_frame)
     return frames_out
 
