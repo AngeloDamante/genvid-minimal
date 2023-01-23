@@ -26,8 +26,10 @@ class Test_evolver(unittest.TestCase):
 
     def test_even_apply_patch(self):
         patch = np.ones((4, 4, 3))
-        x = np.array([0, 0], dtype=int)
+        x = np.array([200, 400], dtype=int)
         modified_frame, gth = Evolver.apply_patch(frame, patch, x)
+        self.assertEqual(np.count_nonzero(modified_frame) / 3, 16)
+        self.assertEqual(np.all(modified_frame[198:202, 398:402] == 1), True)
 
     def test_apply_patch_failure(self):
         x = np.array([-2, -2], dtype=int)

@@ -114,10 +114,9 @@ class Evolver:
         c_i = int(x[1] - int(patch.shape[1] / 2))
         c_f = int(x[1] + int(patch.shape[1] / 2) + 1)
 
-        # check patch
+        # check for even case for patch
         if patch.shape[0] % 2 == 0:
             r_f = int(x[0] + int(patch.shape[0] / 2))
-
         if patch.shape[1] % 2 == 0:
             c_f = int(x[1] + int(patch.shape[1] / 2))
 
