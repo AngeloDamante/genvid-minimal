@@ -9,16 +9,17 @@ from src.MovementType import MovementType
 from typing import Tuple
 
 
-def parse_background(bg: str) -> np.ndarray:
+def parse_background(bg: str, frame_width:int, frame_height:int) -> np.ndarray:
     np_background = np.zeros((frame_height, frame_width, 3))
-    if os.path.exists(args.background):
-        np_background = cv2.imread(args.background, mode='RGB')
-    if ',' in bg:
-        parts = args.background.split(',')
+    bg_path = check_exists_with_default_dir(bg, "backgrounds")
+    if os.path.exists(bg_path):
+        new_img = cv2.imread(bg_path)
+        np_background = cv2.resize(new_img, dsize=(frame_width, frame_height), interpolation=cv2.INTER_AREA)
+    elif ',' in bg:
+        parts = bg.split(',')
         if len(parts) >= 3:
             try:
                 r, g, b = int(parts[0]), int(parts[0]), int(parts[0])
-                np_background = np.zeros((frame_height, frame_width, 3))
                 r = np.ones((frame_height, frame_width)) * r
                 g = np.ones((frame_height, frame_width)) * g
                 b = np.ones((frame_height, frame_width)) * b
@@ -170,7 +171,7 @@ if __name__ == '__main__':
 
     frame_width = args.width
     frame_height = args.height
-    np_background = parse_background(args.background)
+    np_background = parse_background(args.background, frame_width, frame_height)
     instructions = parse_json(args.input_json)
     fps = args.fps
     video_out = args.video
