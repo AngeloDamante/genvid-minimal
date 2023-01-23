@@ -7,11 +7,11 @@ import cv2
 frame_w = 1280
 frame_h = 720
 frame = np.zeros((frame_h, frame_w, 3))
-patch = np.ones((3, 3, 3))
 
 
 class Test_evolver(unittest.TestCase):
     def test_apply_patch(self):
+        patch = np.ones((3, 3, 3))
         x = np.array([200, 400], dtype=int)
         modified_frame, gth = Evolver.apply_patch(frame, patch, x)
         self.assertEqual(np.all(modified_frame[199:202, 399:402] == 1), True)
@@ -24,8 +24,14 @@ class Test_evolver(unittest.TestCase):
         self.assertEqual(np.count_nonzero(modified_frame) / 3, 4)
         self.assertEqual((gth[0], gth[1], gth[2], gth[3]), (0, 0, 1, 1))
 
+    def test_even_apply_patch(self):
+        patch = np.ones((4, 4, 3))
+        x = np.array([0, 0], dtype=int)
+        modified_frame, gth = Evolver.apply_patch(frame, patch, x)
+
     def test_apply_patch_failure(self):
         x = np.array([-2, -2], dtype=int)
+        patch = np.ones((3, 3, 3))
         modified_frame, gth = Evolver.apply_patch(frame, patch, x)
         self.assertEqual(np.count_nonzero(modified_frame) / 3, 0)
         self.assertEqual((gth[0], gth[1], gth[2], gth[3]), (-1, -1, -1, -1))

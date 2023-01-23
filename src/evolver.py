@@ -114,6 +114,13 @@ class Evolver:
         c_i = int(x[1] - int(patch.shape[1] / 2))
         c_f = int(x[1] + int(patch.shape[1] / 2) + 1)
 
+        # check patch
+        if patch.shape[0] % 2 == 0:
+            r_f = int(x[0] + int(patch.shape[0] / 2))
+
+        if patch.shape[1] % 2 == 0:
+            c_f = int(x[1] + int(patch.shape[1] / 2))
+
         # out of border
         if r_i >= frame.shape[0] or r_f <= 0 or c_i >= frame.shape[1] or c_f <= 0:
             return frame, [-1, -1, -1, -1]
