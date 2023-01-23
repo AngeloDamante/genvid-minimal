@@ -35,7 +35,8 @@ def aggregate_frames(levels: list, background: np.ndarray) -> list:
             if frame_index < len(levels[i]):
                 frame = levels[i][frame_index]
                 mask = frame == zeros_
-                base_frame = (1 - mask) * frame + base_frame * mask
+                mask_inverse = (1 - mask) == zeros_
+                base_frame = mask_inverse * frame + base_frame * mask
         frames_out.append(base_frame)
     return frames_out
 
