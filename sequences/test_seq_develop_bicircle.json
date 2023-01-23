@@ -10,5 +10,11 @@
     "patch_ratio": 0.8,
     "route": "diag_right.txt",
     "patch": "square_green.npy"
+  },
+  {
+    "patch_label": 2,
+    "patch_ratio": 0.2,
+    "route": "diag_right2.txt",
+    "patch": "square.npy"
   }
 ]
