@@ -3,6 +3,7 @@ import os
 import sys
 import cv2
 import logging
+from tqdm import tqdm
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
@@ -27,7 +28,8 @@ class Instruction:
 def aggregate_frames(levels: list, background: np.ndarray) -> list:
     frames_out = []
     zeros_ = np.array([0,0,0])
-    for frame_index in range(max([len(l) for l in levels])):
+    logging.info("Aggregating frames...")
+    for frame_index in tqdm(range(max([len(l) for l in levels]))):
         base_frame = background.copy()
         for i in range(len(levels)):
             if frame_index < len(levels[i]):
@@ -43,6 +45,7 @@ def render_video(video_path:str, frames:list, fps:int):
     frameSize = frames[0].shape[1], frames[0].shape[0]
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter(video_path, fourcc, fps, frameSize)
+    logging.info("Rendering frames...")
     for frame in frames:
         out.write(frame.astype('uint8'))
     out.release()
@@ -70,20 +73,23 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     logging.info("Saving annotations in {}".format(dataset_dir))
     levels = []
     ann_out = []
-    for instruction in instructions:
+    logging.info("Evolving objects...")
+    for instruction in tqdm(instructions):
         evolver = Evolver(width, height, instruction.origin_x, instruction.origin_y, instruction.patch, fps)
         frames_out, annotations = evolver.compute_evolutions(instruction.route)
         levels.append(frames_out)
         ann_out.append([(instruction.label, ann) for ann in annotations])
     frames_out = aggregate_frames(levels, background)
-    for i in range(len(frames_out)):
+    logging.info("Writing dataset in yolo annotations...")
+    for i in tqdm(range(len(frames_out))):
         fn = os.path.join(dataset_dir, "{:010d}".format(i))
         cv2.imwrite(fn + ".png", frames_out[i])
         with open(fn + ".txt", 'w') as file:
             for j in range(len(ann_out)):
-                label, ann = ann_out[j][i]
-                ann_yolo = create_annotation(ann, width, height)
-                file.write("{} {} {} {} {}".format(label, ann_yolo[0], ann_yolo[1], ann_yolo[2], ann_yolo[3]))
+                if i < len(ann_out[j]):
+                    label, ann = ann_out[j][i]
+                    ann_yolo = create_annotation(ann, width, height)
+                    file.write("{} {} {} {} {}\n".format(label, ann_yolo[0], ann_yolo[1], ann_yolo[2], ann_yolo[3]))
     if video_out is not None:
         render_video(video_out, frames_out, fps)
     return frames_out
