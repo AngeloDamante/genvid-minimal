@@ -59,7 +59,7 @@ def build_datasets_dir(base_dir):
 
 
 def create_annotation(annotation_ul_dr, w:int, h:int):
-    uw, uh, dw, dh = annotation_ul_dr
+    uh, uw, dh, dw = annotation_ul_dr
     # [cx, cy, w, h] relative to w, h
     return [((dw+uw)/2.0)/w, ((dh+uh)/2.0)/h, (dw-uw)/w, (dh-uh)/h]
 
@@ -78,7 +78,7 @@ def simulate(width: int, height: int, background: np.ndarray, instructions: list
     frames_out = aggregate_frames(levels, background)
     for i in range(len(frames_out)):
         fn = os.path.join(dataset_dir, "{:010d}".format(i))
-        np.save(fn + ".jpg", frames_out[i])
+        cv2.imwrite(fn + ".png", frames_out[i])
         with open(fn + ".txt", 'w') as file:
             for j in range(len(ann_out)):
                 label, ann = ann_out[j][i]
