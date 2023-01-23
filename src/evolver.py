@@ -59,7 +59,7 @@ class Evolver:
             gth(list): list of path center coord in the frame
         """
         for (d_w, d_h, command, time_ms) in route:
-            #
+            # compute kinematic data
             dest = np.array([d_h, d_w], dtype=float)
             t_f = time_ms / 1000
             num_frames = int(self.fps * t_f)
