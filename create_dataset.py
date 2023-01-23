@@ -131,7 +131,7 @@ def test_save_patches():
     Create and save basic patches.
     """
     image_blank = np.zeros((101, 101, 3), np.uint8)
-    image_blank[:0:50] = (0, 0, 255)  # Green in BGR format
+    image_blank[:,:,:] = (0, 0, 255)  # Green in BGR format
     np.save("patches/square", image_blank)
 
     image_blank = np.zeros((101, 101, 3), np.uint8)
