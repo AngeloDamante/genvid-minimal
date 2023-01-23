@@ -55,7 +55,7 @@ def trapezoidal_profile(x_i: float, x_f: float, t_f: float, v_c: float, t: float
         x(float): motion law
     """
     if abs(v_c) <= abs(x_f - x_i) / t_f or abs(v_c) > 2 * abs(x_f - x_i) / t_f:
-        return False, 0
+        return False, x_i
 
     t_c = (x_i - x_f + v_c * t_f) / v_c
     acc = (v_c ** 2) / (x_i - x_f + v_c * t_f)
