@@ -84,7 +84,7 @@ def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
         if len(instr) == 0:
             logging.warning("Found istructions line empty, skipping")
             continue
-        dw, dh, _type, _time = int(instr[0]), int(instr[1]), str(instr[2]), str(instr[3])
+        dw, dh, _type, _time = int(instr[0]), int(instr[1]), str(instr[2]).strip(), str(instr[3])
         if _type not in allowed_types:
             logging.error(
                 "Unable to parse step type '{}', use {}".format(_type, allowed_types))
@@ -114,7 +114,7 @@ def parse_json(fn) -> list:
         if patch_path.endswith(".npy"):
             p = np.load(patch_path)
         else:
-            cv2.imread(patch_path)
+            p = cv2.imread(patch_path)
         ratio = obj_info["patch_ratio"]
         patch = cv2.resize(p, dsize=(
             int(p.shape[0] * ratio), int(p.shape[1] * ratio)), interpolation=cv2.INTER_AREA)
@@ -140,8 +140,17 @@ def test_save_patches():
     cv2.imwrite("patches/circle.png", image_blank)
 
 
+def configure_logging(log_filename: str, log_console=False, log_lvl=logging.DEBUG):
+    if log_console:
+        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
+                            level=log_lvl)
+    else:
+        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
+                            filename=log_filename, level=log_lvl)
+
+
 if __name__ == '__main__':
-    logging.basicConfig()
+    configure_logging("log_dataset_Creation.log", True, log_lvl=logging.DEBUG)
     parser = argparse.ArgumentParser()
     parser.add_argument("-W", "--width", type=int, default=1280,
                         help="Dataset frame height (e.g. 1280)")
