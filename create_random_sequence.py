@@ -4,26 +4,32 @@ import random
 import os
 import argparse
 
-DIR_SEQUENCES = "sequences"
-DIR_PATCHES = "patches"
-DIR_ROUTES = "routes"
 
-
-def json_generator(num_instrunction: int) -> list:
+def json_generator(num_objects: int, routes: list = None, patches: list = None) -> list:
     """Generator sequences for json file.
 
     Args:
-        num_instrunction(int)
+        patches:
+        routes:
+        num_objects(int)
 
     Returns: list of dictionary for json file
     """
+    DIR_ROUTES = "routes"
+    DIR_PATCHES = "patches"
+
+    if routes is None:
+        routes = os.listdir(DIR_ROUTES)
+    if patches is None:
+        patches = os.listdir(DIR_PATCHES)
+
     seq = []
-    for i in range(num_instrunction):
+    for i in range(num_objects):
         my_dict = {
             "patch_label": i,
             "patch_ratio": round(random.uniform(0.1, 1), 2),
-            "route": random.choice(os.listdir(DIR_ROUTES)),
-            "patch": random.choice(os.listdir(DIR_PATCHES))
+            "route": random.choice(routes),
+            "patch": random.choice(patches)
         }
         seq.append(my_dict)
     return seq
@@ -46,15 +52,13 @@ def configure_logging(log_filename: str, log_console=False, log_lvl=logging.DEBU
 
 
 if __name__ == '__main__':
+    DIR_SEQUENCES = "sequences"
+
     configure_logging("log_json_gen.log", True, log_lvl=logging.DEBUG)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--name", type=str, help="name of your random sequences")
-    parser.add_argument("-ns", "--number_sequences", type=int, help="number of sequences to be generated")
+    parser.add_argument("-n", "--name", type=str, required=True, help="name of your random sequences")
+    parser.add_argument("-o", "--number_objects", type=int, default=1, help="number of objects to be generated")
     args = parser.parse_args()
-
-    if args.name is None or args.number_sequences is None:
-        logging.error("Invalid Argument")
-        exit(1)
 
     data = json_generator(args.number_sequences)
     with open(f"{DIR_SEQUENCES}/{args.name}.json", 'w+') as outfile:
