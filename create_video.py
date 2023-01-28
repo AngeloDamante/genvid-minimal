@@ -6,6 +6,7 @@ import os
 import logging
 from src.simulator import simulate, Instruction
 from src.MovementType import MovementType
+from src.LoggingManager import configure_logging
 from typing import Tuple
 
 
@@ -141,17 +142,8 @@ def test_save_patches():
     cv2.imwrite("patches/circle.png", image_blank)
 
 
-def configure_logging(log_filename: str, log_console=False, log_lvl=logging.DEBUG):
-    if log_console:
-        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-                            level=log_lvl)
-    else:
-        logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p',
-                            filename=log_filename, level=log_lvl)
-
-
 if __name__ == '__main__':
-    configure_logging("log_dataset_Creation.log", True, log_lvl=logging.DEBUG)
+    configure_logging(log_lvl=logging.DEBUG, log_console=True)
     parser = argparse.ArgumentParser()
     parser.add_argument("-W", "--width", type=int, default=1280,
                         help="Dataset frame height (e.g. 1280)")
