@@ -25,13 +25,13 @@ def json_generator(num_objects: int, routes: list = None, patches: list = None) 
 
     seq = []
     for i in range(num_objects):
-        my_dict = {
+        obj_path = {
             "patch_label": i,
             "patch_ratio": round(random.uniform(0.1, 1), 2),
             "route": random.choice(routes),
             "patch": random.choice(patches)
         }
-        seq.append(my_dict)
+        seq.append(obj_path)
     return seq
 
 
