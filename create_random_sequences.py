@@ -6,7 +6,7 @@ import argparse
 
 DIR_SEQUENCES = "sequences"
 DIR_PATCHES = "patches"
-DIR_ROUTES = "patches"
+DIR_ROUTES = "routes"
 
 
 def json_generator(num_instrunction: int) -> list:
