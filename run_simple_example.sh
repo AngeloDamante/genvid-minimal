@@ -1,4 +1,4 @@
-python3 create_dataset.py \
+python3 create_video.py \
 	--width=1280 \
 	--height=720 \
 	--background="0,0,0" \
