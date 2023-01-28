@@ -36,18 +36,27 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
     instructions = []
 
     # make origin
-    origin = (random.uniform(0, frame_size[1]), random.uniform(0, frame_size[0]))
-    instructions.append(",".join(origin))
+    origin = [random.uniform(0, frame_size[1]), random.uniform(0, frame_size[0])]
+    instructions.append(",".join(str(origin)))
 
     # times
     timeframe = generate_number_with_sum(num_instructions, duration)
+
+    # generate instructions
+    cmd = "pause"
     for i in range(len(timeframe)):
         # generate command
-        if i == 0:
-            cmd = random.choice(commands - ["pause"])
-    # TODO
+        if cmd == "pause":
+            cmd = random.choice(tuple(set(commands) - {"pause"}))
+        else:
+            cmd = random.choice(commands)
 
-
+        # generate destination
+        dst = ()
+        if cmd != "pause":
+            dst = (random.uniform(0, frame_size[1]), random.uniform(0, frame_size[0]))
+        instruction = [dst, cmd, i]
+        instructions.append(",".join(str(instruction)))
 
     return instructions
 
