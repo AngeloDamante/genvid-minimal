@@ -37,14 +37,14 @@ A simple example can be found by running ` ./run_simple_example.sh `.
 A full example here:
 
 ```
-python3 create_dataset.py   --background="0,0,0" --width=1280 --height=720 --input-json="i2.json" --fps=30
+python3 create_video.py   --background="0,0,0" --width=1280 --height=720 --input-json="i2.json" --fps=30
                             --background="bg1.png"
 ```
 
 All paths can be passed as static, relative to current dir or relative to own dir:
 
 ```
-├── create_dataset.py
+├── create_video.py
 ├── sequences
 │   └── example_2_figures.json
 ├── patches

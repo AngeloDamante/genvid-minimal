@@ -1,4 +1,4 @@
-python3 create_dataset.py \
+python3 create_video.py \
 	--width=640 \
 	--height=480 \
 	--background="maps_roma.jpg" \
