@@ -14,8 +14,10 @@ def json_generator(num_objects: int, routes: list = None, patches: list = None) 
 
     Returns: list of dictionary for json file
     """
-    DIR_ROUTES = "routes"
-    DIR_PATCHES = "patches"
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+    DIR_ROUTES = os.path.join(__location__, "routes")
+    DIR_PATCHES = os.path.join(__location__, "patches")
 
     if routes is None:
         routes = os.listdir(DIR_ROUTES)
