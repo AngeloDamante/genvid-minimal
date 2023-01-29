@@ -5,25 +5,27 @@ import argparse
 commands = ["const", "acc", "trap", "pause"]
 
 
-def generate_number_with_sum(n: int, total: int):
-    """Generate random numnbers with desired sum.
+def generate_number_with_sum(n: int, total: int, min_value: int = 1):
+    """Generate random numbers with desired sum.
 
     Args:
-        n: numbers
-        total: sum of numbers
+        n: number of elements
+        total: sum of elements
+        min_value: min value for each element
 
     Returns:
-        values(list) of n numbers with total sum
+        values(list) of n elements with total sum
     """
-    if n == 0 or total == 0: return []
-    if n == 1: return [total]
-    if total < n:
+    if n == 0 or total == 0: return [total]
+    if n == 1 or total == 1: return [total]
+
+    if total < n * min_value:
         logging.error("desired sum must be greater than numbers")
-        total = max(total, n)
+        return [total]
 
     values = []
     for _ in range(n - 1):
-        values.append(random.randint(1, total // n))
+        values.append(random.randint(min_value, total // n))
     values.append(total - sum(values))
     return values
 
@@ -45,8 +47,8 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
     origin = [random.randint(0, frame_size[1]), random.randint(0, frame_size[0])]
     instructions.append(f'{origin[0]}, {origin[1]} \n')
 
-    # times
-    timeframe = generate_number_with_sum(num_instructions, duration)
+    # times [ms]
+    timeframe = generate_number_with_sum(num_instructions, duration, 100)
 
     # generate instructions
     cmd = "pause"
