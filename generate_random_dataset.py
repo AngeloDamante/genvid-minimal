@@ -38,8 +38,8 @@ if __name__ == '__main__':
     if min_routes > max_routes:
         logging.error("--min-routes can't be more than --max-routes")
         exit(2)
-    min_pr = args.min_patch_ration
-    max_pr = args.max_patch_ration
+    min_pr = args.min_patch_ratio
+    max_pr = args.max_patch_ratio
     if min_pr > max_pr:
         logging.error("--min-patch-ratio can't be more than --max-patch-ratio")
         exit(2)
