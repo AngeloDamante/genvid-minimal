@@ -67,7 +67,7 @@ if __name__ == '__main__':
         route_new = routes_generator(
             num_instructions=instr,
             duration=duration,
-            frame_size=(frame_width, frame_height)
+            frame_size=(frame_height, frame_width)
         )
         route_fn = f"{BASE_DIR_ROUTES}/route_{name}_{i}.txt"
         with open(route_fn, 'w') as outfile:
@@ -105,7 +105,7 @@ if __name__ == '__main__':
         if save_video:
             video_path = os.path.join(dataset_dir, f"vid{i}.mp4")
         logging.info("")
-        logging.info("Creating {}", dataset_dir)
+        logging.info(f"Creating {dataset_dir}")
         if USE_OS:
             os.system(f"""
                 python3 create_video.py \
