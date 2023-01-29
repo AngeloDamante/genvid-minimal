@@ -104,6 +104,8 @@ if __name__ == '__main__':
         video_path = None
         if save_video:
             video_path = os.path.join(dataset_dir, f"vid{i}.mp4")
+        logging.info("")
+        logging.info("Creating {}", dataset_dir)
         if USE_OS:
             os.system(f"""
                 python3 create_video.py \
