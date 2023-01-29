@@ -17,11 +17,18 @@ class TestRandomRouteGenerator(unittest.TestCase):
 
         # case sum < n
         values = generate_number_with_sum(5, 3)
-        self.assertEqual(sum(values), 5)
+        self.assertEqual(sum(values), 3)
+
+        # with min_value
+        values = generate_number_with_sum(5, 1000, 100)
+        self.assertEqual(sum(values), 1000)
+        self.assertEqual(min(values) >= 100, True)
+        values = generate_number_with_sum(5, 1000, 300)
+        self.assertEqual(min(values) >= 300, True)
 
     def test_routes_generator(self):
         num_instructions = 10
-        duration = 1000
+        duration = 2000
         frame_size = (720, 640)
         instructions = routes_generator(num_instructions, duration, frame_size)
 
