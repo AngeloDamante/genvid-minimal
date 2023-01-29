@@ -36,7 +36,7 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
     Args:
         num_instructions(int):
         duration: [ms]
-        frame_size: (w,h)
+        frame_size: (dw,dh)
 
     Returns:
         list of instructions
