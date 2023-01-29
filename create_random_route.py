@@ -1,6 +1,5 @@
 import logging
 import random
-import os
 import argparse
 
 commands = ["const", "acc", "trap", "pause"]
@@ -16,14 +15,21 @@ def generate_number_with_sum(n: int, total: int):
     Returns:
         values(list) of n numbers with total sum
     """
-    if n == 1:
-        return [total]
-    num = random.randint(1, total)
-    return [num] + generate_number_with_sum(n - 1, total - num)
+    if n == 0 or total == 0: return []
+    if n == 1: return [total]
+    if total < n:
+        logging.error("desired sum must be greater than numbers")
+        total = max(total, n)
+
+    values = []
+    for _ in range(n - 1):
+        values.append(random.randint(1, total // n))
+    values.append(total - sum(values))
+    return values
 
 
 def routes_generator(num_instructions: int, duration: int, frame_size: tuple) -> list:
-    """Genrate instruction list.
+    """Generate instruction list.
 
     Args:
         num_instructions(int):
@@ -31,20 +37,20 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
         frame_size: (w,h)
 
     Returns:
-        list of instractions
+        list of instructions
     """
     instructions = []
 
     # make origin
-    origin = [random.uniform(0, frame_size[1]), random.uniform(0, frame_size[0])]
-    instructions.append(",".join(str(origin)))
+    origin = [random.randint(0, frame_size[1]), random.randint(0, frame_size[0])]
+    instructions.append(f'{origin[0]}, {origin[1]} \n')
 
     # times
     timeframe = generate_number_with_sum(num_instructions, duration)
 
     # generate instructions
     cmd = "pause"
-    for i in range(len(timeframe)):
+    for i in timeframe:
         # generate command
         if cmd == "pause":
             cmd = random.choice(tuple(set(commands) - {"pause"}))
@@ -54,10 +60,11 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
         # generate destination
         dst = ()
         if cmd != "pause":
-            dst = (random.uniform(0, frame_size[1]), random.uniform(0, frame_size[0]))
-        instruction = [dst, cmd, i]
-        instructions.append(",".join(str(instruction)))
-
+            dst = (random.randint(0, frame_size[1]), random.randint(0, frame_size[0]))
+            instruction = f'{dst[0]}, {dst[1]}, {cmd}, {i} \n'
+        else:
+            instruction = f'{cmd}, {i} \n'
+        instructions.append(instruction)
     return instructions
 
 
@@ -76,4 +83,4 @@ if __name__ == '__main__':
     # save file
     DIR_ROUTES = "routes"
     with open(f"{DIR_ROUTES}/{args.name}.txt", 'w+') as outfile:
-        outfile.write(str(generated_instructions))
+        outfile.writelines(generated_instructions)
