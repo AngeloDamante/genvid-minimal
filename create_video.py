@@ -110,7 +110,7 @@ def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
                 "Unable to parse step type '{}', use {}".format(_type, allowed_types))
             exit(6)
         tp = txt_to_MovementType(_type)
-        route.append([dw, dh, tp, int(_time)])
+        route.append([dw, dh, tp, int(float(_time))])
     return ox, oy, route
 
 
