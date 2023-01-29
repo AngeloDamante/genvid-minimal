@@ -67,7 +67,7 @@ if __name__ == '__main__':
         route_new = routes_generator(
             num_instructions=instr,
             duration=duration,
-            frame_size=(frame_height, frame_width)
+            frame_size=(frame_width, frame_height)
         )
         route_fn = f"{BASE_DIR_ROUTES}/route_{name}_{i}.txt"
         with open(route_fn, 'w') as outfile:
