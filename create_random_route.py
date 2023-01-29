@@ -36,7 +36,7 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
     Args:
         num_instructions(int):
         duration: [ms]
-        frame_size: (dw,dh)
+        frame_size: (w,h)
 
     Returns:
         list of instructions
@@ -45,7 +45,7 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
 
     # make origin
     origin = [random.randint(0, frame_size[1]), random.randint(0, frame_size[0])]
-    instructions.append(f'{origin[0]}, {origin[1]} \n')
+    instructions.append(f'{origin[1]}, {origin[0]} \n')
 
     # times [ms]
     timeframe = generate_number_with_sum(num_instructions, duration, 100)
@@ -63,7 +63,7 @@ def routes_generator(num_instructions: int, duration: int, frame_size: tuple) ->
         dst = ()
         if cmd != "pause":
             dst = (random.randint(0, frame_size[1]), random.randint(0, frame_size[0]))
-            instruction = f'{dst[0]}, {dst[1]}, {cmd}, {i} \n'
+            instruction = f'{dst[1]}, {dst[0]}, {cmd}, {i} \n'
         else:
             instruction = f'{cmd}, {i} \n'
         instructions.append(instruction)
