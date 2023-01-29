@@ -12,8 +12,8 @@ from typing import Tuple
 
 def parse_background(bg: str, frame_width:int, frame_height:int) -> np.ndarray:
     np_background = np.zeros((frame_height, frame_width, 3))
-    bg_path = check_exists_with_default_dir(bg, "backgrounds")
-    if os.path.exists(bg_path):
+    bg_path = check_exists_with_default_dir_noexc(bg, "backgrounds")
+    if bg_path is not None and os.path.exists(bg_path):
         new_img = cv2.imread(bg_path)
         np_background = cv2.resize(new_img, dsize=(frame_width, frame_height), interpolation=cv2.INTER_AREA)
     elif ',' in bg:
@@ -45,7 +45,7 @@ def check_json_field(index: int, json_dict: dict, val: str, required: bool = Tru
             json_dict[val] = default_val
 
 
-def check_exists_with_default_dir(fn: str, default_dir: str):
+def check_exists_with_default_dir_noexc(fn: str, default_dir: str):
     """
     Checks if given path exists in a default directory.
     Otherwise, it will check in current path.
@@ -56,14 +56,25 @@ def check_exists_with_default_dir(fn: str, default_dir: str):
         # Trying as relative/abs path
         path = fn
         if not os.path.exists(path):
-            logging.error(
-                "File {} does not exist as path or in '{}' folder".format(fn, default_dir))
-            exit(3)
+            return None
+    return path
+
+
+def check_exists_with_default_dir(fn: str, default_dir: str):
+    """
+    Checks if given path exists in a default directory.
+    Otherwise, it will check in current path.
+    Otherwise it will exit
+    """
+    path = check_exists_with_default_dir_noexc(fn, default_dir)
+    if path is None:
+        logging.error("File {} does not exist as path or in '{}' folder".format(fn, default_dir))
+        exit(3)
     return path
 
 
 def txt_to_MovementType(_type: str) -> MovementType:
-    if _type == 'linear':
+    if _type == 'const':
         return MovementType.urm
     elif _type == 'acc':
         return MovementType.uarm
@@ -75,18 +86,25 @@ def txt_to_MovementType(_type: str) -> MovementType:
 
 
 def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
-    allowed_types = ['linear', 'acc', 'dec', 'trap']
+    allowed_types = ['const', 'acc', 'dec', 'trap']
     with open(istr_file, 'r') as file:
         route_readed = [l.strip() for l in file.readlines()]
     origin = route_readed[0].split(',')
     ox, oy = int(origin[0]), int(origin[1])
+    last_dw, last_dh = ox, oy
     route = []
     for i in range(1, len(route_readed), 1):
         instr = route_readed[i].split(',')
         if len(instr) == 0:
             logging.warning("Found istructions line empty, skipping")
             continue
-        dw, dh, _type, _time = int(instr[0]), int(instr[1]), str(instr[2]).strip(), str(instr[3])
+        if len(instr) >=4:
+            dw, dh, _type, _time = int(instr[0]), int(instr[1]), str(instr[2]).strip(), str(instr[3])
+        elif len(instr) < 4 and instr[0].strip() == "pause":
+            dw, dh, _type, _time = last_dw, last_dh, "const", str(instr[1])
+        else:
+            logging.error("Unable to parse line {}".format(route_readed[i]))
+            exit(7)
         if _type not in allowed_types:
             logging.error(
                 "Unable to parse step type '{}', use {}".format(_type, allowed_types))

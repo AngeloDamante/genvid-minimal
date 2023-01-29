@@ -37,13 +37,13 @@ if __name__ == '__main__':
         logging.error("--min-routes can't be more than --max-routes")
         exit(2)
     duration = args.duration * 1000
-    if number_videos <= 100:
+    if duration <= 100:
         logging.error("--duration must be more than 100 ms")
         exit(3)
     frame_width = args.width
     frame_height = args.height
     background = args.background
-    objects = [os.path.join(pa, "patches") for pa in os.listdir("patches")]
+    objects = [os.path.join("patches", pa) for pa in os.listdir("patches")]
     if args.objects != '':
         objects = []
         for pa in args.objects.split(','):
@@ -53,6 +53,7 @@ if __name__ == '__main__':
                 if not os.path.exists(obj_path):
                     logging.error("Unable to find patch " + pa)
                     exit(1)
+            objects.append(obj_path)
     save_video = args.save_video
     fps = args.fps
 
@@ -89,8 +90,42 @@ if __name__ == '__main__':
         all_sequences.append(seq_fn)
 
     logging.info("Building videos...")
-    for seq in all_sequences:
-        # simulate( ... )
-        pass
+    USE_OS = False
+    out_dir = f"datasets_out"
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+    # create dataset_name_0, if exists dataset_name_1, ....
+    i = 0
+    dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
+    while os.path.exists(dataset_dir):
+        i += 1
+        dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
+    for i, seq in enumerate(all_sequences):
+        video_path = None
+        if save_video:
+            video_path = os.path.join(dataset_dir, f"vid{i}.mp4")
+        if USE_OS:
+            os.system(f"""
+                python3 create_video.py \
+                    --width={frame_width} \
+                    --height={frame_height} \
+                    --background={background} \
+                    --input-json={seq} \
+                    --output-dir={dataset_dir}\
+                    --video="datasets_out/video_mcqueen_dev.mp4" \
+                    --fps={fps}
+            """)
+        else:
+            from create_video import simulate, parse_background, parse_json
+            np_background = parse_background(background, frame_width, frame_height)
+            instructions = parse_json(seq)
+            simulate(
+                width=frame_width,
+                height=frame_height,
+                background=np_background,
+                instructions=instructions,
+                dataset_dir=dataset_dir,
+                video_out=video_path,
+                fps=fps)
 
     logging.info("Ended dataset creation")
