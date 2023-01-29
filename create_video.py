@@ -134,10 +134,14 @@ def parse_json(fn) -> list:
         if patch_path.endswith(".npy"):
             p = np.load(patch_path)
         else:
-            p = cv2.imread(patch_path)
+            p = cv2.imread(patch_path, cv2.IMREAD_UNCHANGED)
+            # if there is an alpha channel, set to zeros and change to 3D
+            if p.shape[2] == 4:
+                p[np.where(p[:, :, 3] == 0)] = [0, 0, 0, 0]
+                p = p[:, :, :3]
         ratio = obj_info["patch_ratio"]
         patch = cv2.resize(p, dsize=(
-            int(p.shape[0] * ratio), int(p.shape[1] * ratio)), interpolation=cv2.INTER_AREA)
+            int(p.shape[1] * ratio), int(p.shape[0] * ratio)), interpolation=cv2.INTER_AREA)
         ox, oy, route = parse_instructions(route_path)
 
         inst = Instruction(label=label, patch=patch,
