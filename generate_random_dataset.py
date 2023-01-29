@@ -17,6 +17,8 @@ if __name__ == '__main__':
     parser.add_argument("-NV", "--number-videos", type=int, default=5, help="Number of sequences to create.")
     parser.add_argument("-MinR", "--min-routes", type=int, default=5, help="Min number of routes per video.")
     parser.add_argument("-MaxR", "--max-routes", type=int, default=10, help="Max number of routes per video.")
+    parser.add_argument("-MinP", "--min-patch-ratio", type=float, default=0.1, help="Min patch ratio for object scaling.")
+    parser.add_argument("-MaxP", "--max-patch-ratio", type=float, default=1, help="Max patch ratio for object scaling.")
     parser.add_argument("-D", "--duration", type=float, default=10, help="Duration of each sequence (seconds).")
     parser.add_argument("-W", "--width", type=int, default=1280, help="Dataset frame height (e.g. 1280)")
     parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
@@ -35,6 +37,11 @@ if __name__ == '__main__':
     max_routes = args.max_routes
     if min_routes > max_routes:
         logging.error("--min-routes can't be more than --max-routes")
+        exit(2)
+    min_pr = args.min_patch_ration
+    max_pr = args.max_patch_ration
+    if min_pr > max_pr:
+        logging.error("--min-patch-ratio can't be more than --max-patch-ratio")
         exit(2)
     duration = args.duration * 1000
     if duration <= 100:
@@ -81,6 +88,8 @@ if __name__ == '__main__':
         num_objs = random.randint(1, len(objects))
         seq_new = json_generator(
             num_objects=num_objs,
+            min_ratio=min_pr,
+            max_ratio=max_pr,
             routes=all_routes,
             patches=objects
         )
