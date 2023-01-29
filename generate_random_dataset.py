@@ -114,7 +114,7 @@ if __name__ == '__main__':
                     --background={background} \
                     --input-json={seq} \
                     --output-dir={dataset_dir}\
-                    --video="datasets_out/video_mcqueen_dev.mp4" \
+                    --video={video_path} \
                     --fps={fps}
             """)
         else:
