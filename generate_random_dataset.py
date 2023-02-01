@@ -75,7 +75,7 @@ if __name__ == '__main__':
     BASE_DIR_ROUTES = "routes"
     logging.info("Creating random routes...")
     all_routes = []
-    for i in range(number_videos):
+    for i in range(max(number_videos, max_routes)):
         instr = random.randint(min_routes, max_routes)
         route_new = routes_generator(
             num_instructions=instr,
