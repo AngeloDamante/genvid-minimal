@@ -5,16 +5,14 @@ import argparse
 
 
 def json_generator(num_objects: int,
-                   min_ratio: float = 0.1,
-                   max_ratio: float = 1,
+                   ratios: list = None,
                    routes: list = None,
                    patches: list = None) -> list:
     """Generator sequences for json file.
 
     Args:
         patches:
-        min_ratio(float):
-        max_ratio(float):
+        ratios(list):
         routes:
         num_objects(int)
 
@@ -29,11 +27,13 @@ def json_generator(num_objects: int,
         routes = os.listdir(DIR_ROUTES)
     if patches is None:
         patches = os.listdir(DIR_PATCHES)
-    patches_indexed = [(i, p) for i, p in enumerate(patches)]
+    if ratios is None:
+        ratios = [[0.01, 0.09] for _ in range(len(patches))]
+    patches_indexed = [(i, p, ratio[0], ratio[1]) for i, (p, ratio) in enumerate(zip(patches, ratios))]
 
     seq = []
     for _ in range(num_objects):
-        i, p = random.choice(patches_indexed)
+        i, p, min_ratio, max_ratio = random.choice(patches_indexed)
         obj_path = {
             "patch_label": i,
             "patch_ratio": round(random.uniform(min_ratio, max_ratio), 2),

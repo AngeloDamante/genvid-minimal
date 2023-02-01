@@ -17,8 +17,7 @@ if __name__ == '__main__':
     parser.add_argument("-NV", "--number-videos", type=int, default=5, help="Number of sequences to create.")
     parser.add_argument("-MinR", "--min-routes", type=int, default=5, help="Min number of routes per video.")
     parser.add_argument("-MaxR", "--max-routes", type=int, default=10, help="Max number of routes per video.")
-    parser.add_argument("-MinP", "--min-patch-ratio", type=float, default=0.1, help="Min patch ratio for object scaling.")
-    parser.add_argument("-MaxP", "--max-patch-ratio", type=float, default=1, help="Max patch ratio for object scaling.")
+    parser.add_argument("-IR", "--objects-ratio", type=str, default=None, help='Min,ax patch ratio for object scaling separated by comma (e.g. "0.01,0.09|0.4,0.9"')
     parser.add_argument("-D", "--duration", type=float, default=10, help="Duration of each sequence (seconds).")
     parser.add_argument("-W", "--width", type=int, default=1280, help="Dataset frame height (e.g. 1280)")
     parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
@@ -38,11 +37,13 @@ if __name__ == '__main__':
     if min_routes > max_routes:
         logging.error("--min-routes can't be more than --max-routes")
         exit(2)
-    min_pr = args.min_patch_ratio
-    max_pr = args.max_patch_ratio
-    if min_pr > max_pr:
-        logging.error("--min-patch-ratio can't be more than --max-patch-ratio")
-        exit(2)
+    ratios = args.objects_ratio
+    if ratios is not None:
+        try:
+            ratios = [[float(r.split(',')[0]), float(r.split(',')[1])] for r in ratios.split('|')]
+        except Exception as e:
+            logging.error("Unable to parse --objects-ratio like min1,max1|min2,max2|...")
+            exit(3)
     duration = args.duration * 1000
     if duration <= 100:
         logging.error("--duration must be more than 100 ms")
@@ -61,6 +62,11 @@ if __name__ == '__main__':
                     logging.error("Unable to find patch " + pa)
                     exit(1)
             objects.append(obj_path)
+
+    if ratios is not None:
+        if len(ratios) != len(objects):
+            logging.error("objects and ratios were given, but they are not same length")
+            exit(5)
     save_video = args.save_video
     fps = args.fps
 
@@ -88,8 +94,7 @@ if __name__ == '__main__':
         num_objs = random.randint(1, len(objects))
         seq_new = json_generator(
             num_objects=num_objs,
-            min_ratio=min_pr,
-            max_ratio=max_pr,
+            ratios=ratios,
             routes=all_routes,
             patches=objects
         )
