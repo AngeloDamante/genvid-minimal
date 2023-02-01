@@ -29,16 +29,19 @@ def json_generator(num_objects: int,
         routes = os.listdir(DIR_ROUTES)
     if patches is None:
         patches = os.listdir(DIR_PATCHES)
+    patches_indexed = [(i, p) for i, p in enumerate(patches)]
 
     seq = []
-    for i in range(num_objects):
+    for _ in range(num_objects):
+        i, p = random.choice(patches_indexed)
         obj_path = {
             "patch_label": i,
             "patch_ratio": round(random.uniform(min_ratio, max_ratio), 2),
             "route": random.choice(routes),
-            "patch": random.choice(patches)
+            "patch": p
         }
         seq.append(obj_path)
+    seq.sort(key=lambda x: x["patch_label"], reverse=False)
     return seq
 
 
