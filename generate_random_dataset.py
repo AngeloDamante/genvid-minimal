@@ -17,6 +17,8 @@ if __name__ == '__main__':
     parser.add_argument("-NV", "--number-videos", type=int, default=5, help="Number of sequences to create.")
     parser.add_argument("-MinR", "--min-routes", type=int, default=5, help="Min number of routes per video.")
     parser.add_argument("-MaxR", "--max-routes", type=int, default=10, help="Max number of routes per video.")
+    parser.add_argument("-MinO", "--min-objects", type=int, default=1, help="Min number of objects per video.")
+    parser.add_argument("-MaxO", "--max-objects", type=int, default=4, help="Max number of objects per video.")
     parser.add_argument("-IR", "--objects-ratio", type=str, default=None, help='Min,ax patch ratio for object scaling separated by comma (e.g. "0.01,0.09|0.4,0.9"')
     parser.add_argument("-D", "--duration", type=float, default=10, help="Duration of each sequence (seconds).")
     parser.add_argument("-W", "--width", type=int, default=1280, help="Dataset frame height (e.g. 1280)")
@@ -36,6 +38,11 @@ if __name__ == '__main__':
     max_routes = args.max_routes
     if min_routes > max_routes:
         logging.error("--min-routes can't be more than --max-routes")
+        exit(2)
+    min_objects = args.min_objects
+    max_objects = args.max_objects
+    if min_objects > max_objects:
+        logging.error("--min-objects can't be more than --max-objects")
         exit(2)
     ratios = args.objects_ratio
     if ratios is not None:
@@ -91,7 +98,7 @@ if __name__ == '__main__':
     logging.info("Creating random sequences...")
     all_sequences = []
     for i in range(number_videos):
-        num_objs = random.randint(1, len(objects))
+        num_objs = random.randint(min_objects, max_objects)
         seq_new = json_generator(
             num_objects=num_objs,
             ratios=ratios,
