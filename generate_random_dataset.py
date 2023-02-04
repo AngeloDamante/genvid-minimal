@@ -49,6 +49,7 @@ def create_random_routes(min_routes:int, max_routes:int, min_instructions:int, m
             num_instructions=instr,
             duration=duration,
             frame_size=(frame_width, frame_height),
+            min_pause=int((float(duration)/instr)/1.2),
             commands=commands
         )
         route_fn = f"routes/route_{name}_{i}.txt"
