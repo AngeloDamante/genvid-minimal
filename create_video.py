@@ -123,6 +123,7 @@ def parse_instructions(istr_file: str) -> Tuple[int, int, list]:
             exit(6)
         tp = txt_to_MovementType(_type)
         route.append([dw, dh, tp, int(float(_time))])
+        last_dw, last_dh = dw, dh
     return ox, oy, route
 
 
