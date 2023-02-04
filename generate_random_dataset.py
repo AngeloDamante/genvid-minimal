@@ -164,9 +164,7 @@ if __name__ == '__main__':
     if args.routes != '':
         all_routes = parse_list_filenames(args.routes, "routes")
     else:
-        possible_routes = max(10, number_videos * 2)
-        logging.info(f"Creating {possible_routes} random patches")
-        create_random_routes(possible_routes, min_instructions_per_route, max_instructions_per_route, min_routes_files, max_routes_files, allowed_commands)
+        create_random_routes(min_routes_files, max_routes_files, min_instructions_per_route, max_instructions_per_route, duration, allowed_commands)
 
     logging.info("Creating random sequences...")
     all_sequences = generate_random_sequences(number_videos, min_objects, max_objects, name, ratios, all_routes, objects)
