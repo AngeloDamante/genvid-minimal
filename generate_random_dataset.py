@@ -10,6 +10,11 @@ from create_random_sequence import json_generator
 import random
 
 
+def log_and_exit(message: str, exit_code: int):
+    logging.error(message)
+    exit(exit_code)
+
+
 if __name__ == '__main__':
     configure_logging(log_lvl=logging.DEBUG, log_console=True)
     parser = argparse.ArgumentParser()
@@ -33,30 +38,20 @@ if __name__ == '__main__':
 
     name = args.name
     number_videos = args.number_videos
-    if number_videos < 1:
-        logging.error("--number-videos must be positive")
-        exit(1)
+    if number_videos < 1: log_and_exit("--number-videos must be positive", 1)
     min_routes = args.min_routes
     max_routes = args.max_routes
-    if min_routes > max_routes:
-        logging.error("--min-routes can't be more than --max-routes")
-        exit(2)
+    if min_routes > max_routes: log_and_exit("--min-routes can't be more than --max-routes", 2)
     min_objects = args.min_objects
     max_objects = args.max_objects
-    if min_objects > max_objects:
-        logging.error("--min-objects can't be more than --max-objects")
-        exit(2)
+    if min_objects > max_objects: log_and_exit("--min-objects can't be more than --max-objects", 3)
     ratios = args.objects_ratio
     if ratios is not None:
         try:
             ratios = [[float(r.split(',')[0]), float(r.split(',')[1])] for r in ratios.split('|')]
-        except Exception as e:
-            logging.error("Unable to parse --objects-ratio like min1,max1|min2,max2|...")
-            exit(3)
+        except Exception as e: log_and_exit("Unable to parse --objects-ratio like min1,max1|min2,max2|...", 4)
     duration = args.duration * 1000
-    if duration <= 100:
-        logging.error("--duration must be more than 100 ms")
-        exit(3)
+    if duration <= 100: log_and_exit("--duration must be more than 100 ms", 5)
     frame_width = args.width
     frame_height = args.height
     background = args.background
@@ -72,10 +67,7 @@ if __name__ == '__main__':
                     exit(1)
             objects.append(obj_path)
 
-    if ratios is not None:
-        if len(ratios) != len(objects):
-            logging.error("objects and ratios were given, but they are not same length")
-            exit(5)
+    if ratios is not None and len(ratios) != len(objects): log_and_exit("objects and ratios were given, but they are not same length", 6)
     save_video = args.save_video
     fps = args.fps
     only_create = args.only_create
@@ -89,9 +81,7 @@ if __name__ == '__main__':
             route_path = os.path.join("routes", ob)
             if not os.path.exists(route_path):
                 route_path = ob
-                if not os.path.exists(route_path):
-                    logging.error("Unable to find route " + ob)
-                    exit(1)
+                if not os.path.exists(route_path): log_and_exit("Unable to find route " + ob, 7)
             objects.append(route_path)
     else:
         for i in range(max(number_videos, max_routes)):
