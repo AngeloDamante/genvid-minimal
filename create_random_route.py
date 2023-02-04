@@ -2,7 +2,7 @@ import logging
 import random
 import argparse
 
-commands = ["const", "acc", "trap", "pause"]
+commands_base = ["const", "acc", "trap", "pause"]
 
 
 def generate_number_with_sum(n: int, total: int, min_value: int = 1):
@@ -30,17 +30,20 @@ def generate_number_with_sum(n: int, total: int, min_value: int = 1):
     return values
 
 
-def routes_generator(num_instructions: int, duration: int, frame_size: tuple) -> list:
+def routes_generator(num_instructions: int, duration: int, frame_size: tuple, commands: list = None) -> list:
     """Generate instruction list.
 
     Args:
         num_instructions(int):
         duration: [ms]
         frame_size: (w,h)
+        commands(list): list of commands
 
     Returns:
         list of instructions
     """
+    if commands is None:
+        commands = commands_base
     instructions = []
 
     # make origin
