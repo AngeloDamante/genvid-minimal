@@ -23,11 +23,11 @@ def json_generator(num_objects: int,
     DIR_ROUTES = os.path.join(__location__, "routes")
     DIR_PATCHES = os.path.join(__location__, "patches")
 
-    if routes is None:
+    if routes is None or len(routes) == 0:
         routes = os.listdir(DIR_ROUTES)
-    if patches is None:
+    if patches is None or len(patches) == 0:
         patches = os.listdir(DIR_PATCHES)
-    if ratios is None:
+    if ratios is None or len(ratios) == 0:
         ratios = [[0.01, 0.09] for _ in range(len(patches))]
     patches_indexed = [(i, p, ratio[0], ratio[1]) for i, (p, ratio) in enumerate(zip(patches, ratios))]
 
