@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
     parser.add_argument("-B", "--background", type=str, default='0,0,0', help='Background like color RGB or filename (e.g. "0,0,255", background_1.png)')
     parser.add_argument("-I", "--objects", type=str, default='', help='A subset of objets in patch dir instead of all objects (e.g. "circle.png,square.npy")')
+    parser.add_argument("-R", "--routes", type=str, default='', help='A subset of routes in routes dir instead of all routes (e.g. "pentagon.txt,boxed.txt")')
     parser.add_argument("-SV", "--save-video", action="store_true",  help="If needed, also saves *.mp4 video file in output")
     parser.add_argument("-F", "--fps", type=int, default=30, help="Output sequence fps (e.g. 30)")
     args = parser.parse_args()
@@ -79,20 +80,32 @@ if __name__ == '__main__':
 
     logging.info("Starting dataset creation")
 
-    BASE_DIR_ROUTES = "routes"
-    logging.info("Creating random routes...")
     all_routes = []
-    for i in range(max(number_videos, max_routes)):
-        instr = random.randint(min_routes, max_routes)
-        route_new = routes_generator(
-            num_instructions=instr,
-            duration=duration,
-            frame_size=(frame_width, frame_height)
-        )
-        route_fn = f"{BASE_DIR_ROUTES}/route_{name}_{i}.txt"
-        with open(route_fn, 'w') as outfile:
-            outfile.writelines(route_new)
-        all_routes.append(route_fn)
+    if args.routes != '':
+        objects = []
+        for ob in args.args.split(','):
+            route_path = os.path.join("routes", ob)
+            if not os.path.exists(route_path):
+                route_path = ob
+                if not os.path.exists(route_path):
+                    logging.error("Unable to find route " + ob)
+                    exit(1)
+            objects.append(route_path)
+    else:
+        for i in range(max(number_videos, max_routes)):
+            all_routes = []
+            BASE_DIR_ROUTES = "routes"
+            logging.info("Creating random routes...")
+            instr = random.randint(min_routes, max_routes)
+            route_new = routes_generator(
+                num_instructions=instr,
+                duration=duration,
+                frame_size=(frame_width, frame_height)
+            )
+            route_fn = f"{BASE_DIR_ROUTES}/route_{name}_{i}.txt"
+            with open(route_fn, 'w') as outfile:
+                outfile.writelines(route_new)
+            all_routes.append(route_fn)
 
     BASE_DIR_SEQS = "sequences"
     logging.info("Creating random sequences...")
