@@ -8,6 +8,7 @@ from tqdm import tqdm
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 sys.path.insert(0, __location__)
 from evolver import Evolver
+from BackgroundIterator import BackgroundIterator
 
 
 class Instruction:
@@ -25,12 +26,12 @@ class Instruction:
         self.origin_y = origin_y
 
 
-def aggregate_frames(levels: list, background: np.ndarray) -> list:
+def aggregate_frames(levels: list, background: BackgroundIterator) -> list:
     frames_out = []
-    zeros_ = np.array([0,0,0])
+
     logging.info("Aggregating frames...")
     for frame_index in tqdm(range(max([len(l) for l in levels]))):
-        base_frame = background.copy()
+        base_frame = next(background)
         for i in range(len(levels)):
             if frame_index < len(levels[i]):
                 frame = levels[i][frame_index]
@@ -68,8 +69,7 @@ def create_annotation(annotation_ul_dr, w:int, h:int):
     return [((dw+uw)/2.0)/w, ((dh+uh)/2.0)/h, (dw-uw)/w, (dh-uh)/h]
 
 
-def simulate(width: int, height: int, background: np.ndarray, instructions: list, dataset_dir: str, video_out: str=None, fps: int = 30):
-    empty_back = np.array((0, 0, 0))
+def simulate(width: int, height: int, background: BackgroundIterator, instructions: list, dataset_dir: str, video_out: str=None, fps: int = 30):
     dataset_dir = build_datasets_dir(dataset_dir)
     logging.info("Saving annotations in {}".format(dataset_dir))
     levels = []

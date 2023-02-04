@@ -5,17 +5,29 @@ import cv2
 import os
 import logging
 from src.simulator import simulate, Instruction
+from src.BackgroundIterator import BackgroundIterator
 from src.MovementType import MovementType
 from src.LoggingManager import configure_logging
 from typing import Tuple
 
 
-def parse_background(bg: str, frame_width:int, frame_height:int) -> np.ndarray:
-    np_background = np.zeros((frame_height, frame_width, 3))
+def parse_background(bg: str, frame_width:int, frame_height:int) -> BackgroundIterator:
     bg_path = check_exists_with_default_dir_noexc(bg, "backgrounds")
     if bg_path is not None and os.path.exists(bg_path):
-        new_img = cv2.imread(bg_path)
-        np_background = cv2.resize(new_img, dsize=(frame_width, frame_height), interpolation=cv2.INTER_AREA)
+        cap = cv2.VideoCapture(bg_path)
+        if not cap.isOpened():
+            logging.error("Error opening video stream")
+            exit(3)
+        frames = []
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
+            frames.append(cv2.resize(frame, dsize=(frame_width, frame_height), interpolation=cv2.INTER_AREA))
+        if len(frames) == 0:
+            logging.error("Given background image/video has no frames. exiting.")
+            exit(5)
+        return BackgroundIterator(frames)
     elif ',' in bg:
         parts = bg.split(',')
         if len(parts) >= 3:
@@ -25,6 +37,7 @@ def parse_background(bg: str, frame_width:int, frame_height:int) -> np.ndarray:
                 g = np.ones((frame_height, frame_width)) * g
                 b = np.ones((frame_height, frame_width)) * b
                 np_background = np.dstack((r, g, b))
+                return BackgroundIterator([np_background])
             except Exception as e:
                 logging.error(
                     "Unable to convert 'R,G,B' format from {}".format(bg))
@@ -32,7 +45,6 @@ def parse_background(bg: str, frame_width:int, frame_height:int) -> np.ndarray:
     else:
         logging.error("Unable to parse background color '{}'".format(bg))
         exit(2)
-    return np_background
 
 
 def check_json_field(index: int, json_dict: dict, val: str, required: bool = True, default_val=None):
@@ -172,7 +184,7 @@ if __name__ == '__main__':
     parser.add_argument("-H", "--height", type=int, default=720,
                         help="Dataset frame width (e.g. 720)")
     parser.add_argument("-B", "--background", type=str, default='0,0,0',
-                        help="Background like color RGB or filename (e.g. '0,0,255', background_1.png)")
+                        help="Background like color RGB, filename or video path (e.g. '0,0,255', 'background_1.png' or 'back_vid.mp4')")
     parser.add_argument("-I", "--input-json", type=str,
                         required=True, help="json filename for sequence creation")
     parser.add_argument("-O", "--output-dir", type=str, default="datasets_out",
@@ -185,10 +197,10 @@ if __name__ == '__main__':
 
     frame_width = args.width
     frame_height = args.height
-    np_background = parse_background(args.background, frame_width, frame_height)
+    bg_iterator = parse_background(args.background, frame_width, frame_height)
     instructions = parse_json(args.input_json)
     fps = args.fps
     video_out = args.video
     annotations_dir = args.output_dir
 
-    simulate(frame_width, frame_height, np_background, instructions, annotations_dir, video_out, fps)
+    simulate(frame_width, frame_height, bg_iterator, instructions, annotations_dir, video_out, fps)
