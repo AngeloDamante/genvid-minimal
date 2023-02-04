@@ -28,6 +28,14 @@ pip install -r requirements.txt
 
 TODO: create docker
 
+## Optional data
+
+if needed, there are some background videos that can be downloaded automatically to *backgrounds* directory using:
+
+```
+./download_sample_backgrounds.sh
+```
+
 ## Usage
 
 The main script is **create_dataset.py** which uses src/simulator.py to create the dataset sequences.
@@ -37,8 +45,9 @@ A simple example can be found by running ` ./run_simple_example.sh `.
 A full example here:
 
 ```
-python3 create_video.py   --background="0,0,0" --width=1280 --height=720 --input-json="i2.json" --fps=30
-                            --background="bg1.png"
+python3 create_video.py   --background="0,0,0" --width=640 --height=480 --input-json="square_pentagon_map.json" --fps=30
+                          --background="bg1.png"
+                          --background="buildings_moving.png"
 ```
 
 All paths can be passed as static, relative to current dir or relative to own dir:
