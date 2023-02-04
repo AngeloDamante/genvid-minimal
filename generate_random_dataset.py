@@ -27,6 +27,7 @@ if __name__ == '__main__':
     parser.add_argument("-I", "--objects", type=str, default='', help='A subset of objets in patch dir instead of all objects (e.g. "circle.png,square.npy")')
     parser.add_argument("-R", "--routes", type=str, default='', help='A subset of routes in routes dir instead of all routes (e.g. "pentagon.txt,boxed.txt")')
     parser.add_argument("-SV", "--save-video", action="store_true",  help="If needed, also saves *.mp4 video file in output")
+    parser.add_argument("-OC", "--only-create", action="store_true",  help="Just create the random routes/sequences without creating the dataset")
     parser.add_argument("-F", "--fps", type=int, default=30, help="Output sequence fps (e.g. 30)")
     args = parser.parse_args()
 
@@ -77,6 +78,7 @@ if __name__ == '__main__':
             exit(5)
     save_video = args.save_video
     fps = args.fps
+    only_create = args.only_create
 
     logging.info("Starting dataset creation")
 
@@ -122,6 +124,9 @@ if __name__ == '__main__':
         with open(seq_fn, 'w') as outfile:
             json.dump(seq_new, outfile, indent=2)
         all_sequences.append(seq_fn)
+
+    if only_create:
+        exit(0)
 
     logging.info("Building videos...")
     USE_OS = False
