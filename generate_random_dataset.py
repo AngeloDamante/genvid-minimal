@@ -38,11 +38,12 @@ def parse_list_filenames(objects_args: str, base_dir: str):
     return objects
 
 
-def create_random_routes(routes_num: int, min_routes:int, max_routes:int):
+def create_random_routes(min_routes:int, max_routes:int, min_instructions:int, max_instructions:int, duration:int):
     all_routes = []
+    routes_num = random.randint(min_routes, max_routes)
     for i in range(routes_num):
         logging.debug(f"Creating random route {i}")
-        instr = random.randint(min_routes, max_routes)
+        instr = random.randint(min_instructions, max_instructions)
         route_new = routes_generator(
             num_instructions=instr,
             duration=duration,
@@ -104,8 +105,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--name", required=True, type=str, help="filename of random routes")
     parser.add_argument("-NV", "--number-videos", type=int, default=5, help="Number of sequences to create.")
-    parser.add_argument("-MinR", "--min-routes", type=int, default=5, help="Min number of routes per video.")
-    parser.add_argument("-MaxR", "--max-routes", type=int, default=10, help="Max number of routes per video.")
+    parser.add_argument("-MinR", "--min-routes", type=int, default=10, help="Min number of routes per video.")
+    parser.add_argument("-MaxR", "--max-routes", type=int, default=20, help="Max number of routes per video.")
+    parser.add_argument("-MinI", "--min-instructions", type=int, default=7, help="Min number of instructions per route.")
+    parser.add_argument("-MaxI", "--max-instructions", type=int, default=10, help="Max number of instructions per route.")
     parser.add_argument("-MinO", "--min-objects", type=int, default=1, help="Min number of objects per video.")
     parser.add_argument("-MaxO", "--max-objects", type=int, default=4, help="Max number of objects per video.")
     parser.add_argument("-IR", "--objects-ratio", type=str, default=None, help='Min,ax patch ratio for object scaling separated by comma (e.g. "0.01,0.09|0.4,0.9"')
@@ -126,9 +129,12 @@ if __name__ == '__main__':
     name = args.name
     number_videos = args.number_videos
     if number_videos < 1: log_and_exit("--number-videos must be positive", 1)
-    min_pathes_per_routes = args.min_routes
-    max_pathes_per_routes = args.max_routes
-    if min_pathes_per_routes > max_pathes_per_routes: log_and_exit("--min-routes can't be more than --max-routes", 2)
+    min_routes_files = args.min_routes
+    max_routes_files = args.max_routes
+    if min_routes_files > max_routes_files: log_and_exit("--min-routes can't be more than --max-routes", 2)
+    min_instructions_per_route = args.min_instructions
+    max_instructions_per_route = args.max_instructions
+    if min_instructions_per_route > max_instructions_per_route: log_and_exit("--min-instructions can't be more than --max-instructions", 2)
     min_objects = args.min_objects
     max_objects = args.max_objects
     if min_objects > max_objects: log_and_exit("--min-objects can't be more than --max-objects", 3)
@@ -155,7 +161,7 @@ if __name__ == '__main__':
     else:
         possible_routes = max(10, number_videos * 2)
         logging.info(f"Creating {possible_routes} random patches")
-        create_random_routes(possible_routes, min_pathes_per_routes, max_pathes_per_routes)
+        create_random_routes(possible_routes, min_instructions_per_route, max_instructions_per_route, min_routes_files, max_routes_files)
 
     logging.info("Creating random sequences...")
     all_sequences = generate_random_sequences(number_videos, min_objects, max_objects, name, ratios, all_routes, objects)
