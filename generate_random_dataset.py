@@ -38,7 +38,8 @@ def parse_list_filenames(objects_args: str, base_dir: str):
     return objects
 
 
-def create_random_routes(min_routes:int, max_routes:int, min_instructions:int, max_instructions:int, duration:int):
+def create_random_routes(min_routes:int, max_routes:int, min_instructions:int, max_instructions:int, duration:int, allowed_commands: list = None):
+    commands = ["const", "acc", "trap", "pause"] if allowed_commands is None or len(allowed_commands) == 0 else allowed_commands
     all_routes = []
     routes_num = random.randint(min_routes, max_routes)
     for i in range(routes_num):
@@ -47,7 +48,8 @@ def create_random_routes(min_routes:int, max_routes:int, min_instructions:int, m
         route_new = routes_generator(
             num_instructions=instr,
             duration=duration,
-            frame_size=(frame_width, frame_height)
+            frame_size=(frame_width, frame_height),
+            commands=commands
         )
         route_fn = f"routes/route_{name}_{i}.txt"
         with open(route_fn, 'w') as outfile:
@@ -118,6 +120,7 @@ if __name__ == '__main__':
     parser.add_argument("-B", "--backgrounds", type=str, default='', help='A subset of backgrounds in backgrounds dir instead of all backgrounds (e.g. "vid1.mp4,vid2.mp4")')
     parser.add_argument("-I", "--objects", type=str, default='', help='A subset of objets in patch dir instead of all objects (e.g. "circle.png,square.npy")')
     parser.add_argument("-R", "--routes", type=str, default='', help='A subset of routes in routes dir instead of all routes (e.g. "pentagon.txt,boxed.txt")')
+    parser.add_argument("-AC", "--allowed-commands", type=str, default='const,acc,trap,pause', help='A list of available commands to random create routes in ["const", "acc", "trap", "pause"]')
     parser.add_argument("-SV", "--save-video", action="store_true",  help="If needed, also saves *.mp4 video file in output")
     parser.add_argument("-OC", "--only-create", action="store_true",  help="Just create the random routes/sequences without creating the dataset")
     parser.add_argument("-F", "--fps", type=int, default=30, help="Output sequence fps (e.g. 30)")
@@ -139,6 +142,8 @@ if __name__ == '__main__':
     max_objects = args.max_objects
     if min_objects > max_objects: log_and_exit("--min-objects can't be more than --max-objects", 3)
     ratios = parse_ratios(args.objects_ratio)
+    allowed_commands = args.allowed_commands.split(',')
+    if len(allowed_commands) == 0 or args.allowed_commands.rstrip() == "": log_and_exit("--allowed-commands must contain at least one command", 5)
     duration = args.duration * 1000
     if duration <= 100: log_and_exit("--duration must be more than 100 ms", 5)
     frame_width = args.width
@@ -161,7 +166,7 @@ if __name__ == '__main__':
     else:
         possible_routes = max(10, number_videos * 2)
         logging.info(f"Creating {possible_routes} random patches")
-        create_random_routes(possible_routes, min_instructions_per_route, max_instructions_per_route, min_routes_files, max_routes_files)
+        create_random_routes(possible_routes, min_instructions_per_route, max_instructions_per_route, min_routes_files, max_routes_files, allowed_commands)
 
     logging.info("Creating random sequences...")
     all_sequences = generate_random_sequences(number_videos, min_objects, max_objects, name, ratios, all_routes, objects)
