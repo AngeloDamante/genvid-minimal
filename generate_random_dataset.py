@@ -15,6 +15,16 @@ def log_and_exit(message: str, exit_code: int):
     exit(exit_code)
 
 
+def parse_ratios(ratios_arg: str) -> list:
+    ratios = []
+    if ratios_arg is not None:
+        try:
+            ratios = [[float(r.split(',')[0]), float(r.split(',')[1])] for r in ratios_arg.split('|')]
+        except Exception as e:
+            log_and_exit("Unable to parse --objects-ratio like min1,max1|min2,max2|...", 4)
+    return ratios
+
+
 if __name__ == '__main__':
     configure_logging(log_lvl=logging.DEBUG, log_console=True)
     parser = argparse.ArgumentParser()
@@ -45,11 +55,7 @@ if __name__ == '__main__':
     min_objects = args.min_objects
     max_objects = args.max_objects
     if min_objects > max_objects: log_and_exit("--min-objects can't be more than --max-objects", 3)
-    ratios = args.objects_ratio
-    if ratios is not None:
-        try:
-            ratios = [[float(r.split(',')[0]), float(r.split(',')[1])] for r in ratios.split('|')]
-        except Exception as e: log_and_exit("Unable to parse --objects-ratio like min1,max1|min2,max2|...", 4)
+    ratios = parse_ratios(args.objects_ratio)
     duration = args.duration * 1000
     if duration <= 100: log_and_exit("--duration must be more than 100 ms", 5)
     frame_width = args.width
@@ -67,7 +73,8 @@ if __name__ == '__main__':
                     exit(1)
             objects.append(obj_path)
 
-    if ratios is not None and len(ratios) != len(objects): log_and_exit("objects and ratios were given, but they are not same length", 6)
+    if len(ratios) != 0 and len(ratios) != len(objects):
+        log_and_exit("objects and ratios were given, but they are not same length", 6)
     save_video = args.save_video
     fps = args.fps
     only_create = args.only_create
