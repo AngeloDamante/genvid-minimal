@@ -32,15 +32,17 @@ def json_generator(num_objects: int,
     patches_indexed = [(i, p, ratio[0], ratio[1]) for i, (p, ratio) in enumerate(zip(patches, ratios))]
 
     seq = []
+    routes_choosed = []
     for _ in range(num_objects):
         i, p, min_ratio, max_ratio = random.choice(patches_indexed)
         obj_path = {
             "patch_label": i,
             "patch_ratio": round(random.uniform(min_ratio, max_ratio), 2),
-            "route": random.choice(routes),
+            "route": random.choice(list(set(routes) - set(routes_choosed))),
             "patch": p
         }
         seq.append(obj_path)
+        routes_choosed.append(obj_path["route"])
     seq.sort(key=lambda x: x["patch_label"], reverse=False)
     return seq
 
