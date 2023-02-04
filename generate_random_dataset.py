@@ -7,6 +7,7 @@ import logging
 from src.LoggingManager import configure_logging
 from create_random_route import routes_generator
 from create_random_sequence import json_generator
+from create_video import simulate, parse_background, parse_json
 import random
 
 
@@ -25,6 +26,79 @@ def parse_ratios(ratios_arg: str) -> list:
     return ratios
 
 
+def parse_list_filenames(objects_args: str, base_dir: str):
+    objects = []
+    for fn in objects_args.split(','):
+        filename = os.path.join(base_dir, fn)
+        if not os.path.exists(filename):
+            filename = fn
+            if not os.path.exists(filename):
+                log_and_exit(f"Unable to find {fn}", 10)
+        objects.append(filename)
+    return objects
+
+
+def create_random_routes(routes_num: int, min_routes:int, max_routes:int):
+    all_routes = []
+    for i in range(routes_num):
+        logging.debug(f"Creating random route {i}")
+        instr = random.randint(min_routes, max_routes)
+        route_new = routes_generator(
+            num_instructions=instr,
+            duration=duration,
+            frame_size=(frame_width, frame_height)
+        )
+        route_fn = f"routes/route_{name}_{i}.txt"
+        with open(route_fn, 'w') as outfile:
+            outfile.writelines(route_new)
+        all_routes.append(route_fn)
+    return all_routes
+
+
+def build_next_dataset_dir(out_dir:str):
+    # create dataset_name_0, if exists dataset_name_1, ....
+    i = 0
+    dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
+    while os.path.exists(dataset_dir):
+        i += 1
+        dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
+    return dataset_dir
+
+
+def generate_random_sequences(num_sequences: int, min_objects: int, max_objects: int, name:str, ratios, all_routes, objects):
+    all_sequences = []
+    for i in range(num_sequences):
+        num_objs = random.randint(min_objects, max_objects)
+        seq_new = json_generator(
+            num_objects=num_objs,
+            ratios=ratios,
+            routes=all_routes,
+            patches=objects
+        )
+        seq_fn = f"sequences/seq_{name}_{i}.json"
+        with open(seq_fn, 'w') as outfile:
+            json.dump(seq_new, outfile, indent=2)
+        all_sequences.append(seq_fn)
+    return all_sequences
+
+
+def generate_videos(dta_dir, sequences, w, h, bgs, fps, also_save_video):
+    for i, seq in enumerate(sequences):
+        video_path = os.path.join(dta_dir, f"vid{i}.mp4") if also_save_video else None
+        logging.info(f"\nCreating new sequence #{i}")
+        bg_path = random.choice(bgs)
+        bachground_iterator = parse_background(bg_path, w, h)
+        instructions = parse_json(seq)
+        simulate(
+            width=w,
+            height=h,
+            background=bachground_iterator,
+            instructions=instructions,
+            dataset_dir=dta_dir,
+            video_out=video_path,
+            fps=fps)
+
+
 if __name__ == '__main__':
     configure_logging(log_lvl=logging.DEBUG, log_console=True)
     parser = argparse.ArgumentParser()
@@ -38,20 +112,23 @@ if __name__ == '__main__':
     parser.add_argument("-D", "--duration", type=float, default=10, help="Duration of each sequence (seconds).")
     parser.add_argument("-W", "--width", type=int, default=1280, help="Dataset frame height (e.g. 1280)")
     parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
-    parser.add_argument("-B", "--background", type=str, default='0,0,0', help='Background like color RGB or filename (e.g. "0,0,255", background_1.png)')
+    parser.add_argument("-B", "--backgrounds", type=str, default='', help='A subset of backgrounds in backgrounds dir instead of all backgrounds (e.g. "vid1.mp4,vid2.mp4")')
     parser.add_argument("-I", "--objects", type=str, default='', help='A subset of objets in patch dir instead of all objects (e.g. "circle.png,square.npy")')
     parser.add_argument("-R", "--routes", type=str, default='', help='A subset of routes in routes dir instead of all routes (e.g. "pentagon.txt,boxed.txt")')
     parser.add_argument("-SV", "--save-video", action="store_true",  help="If needed, also saves *.mp4 video file in output")
     parser.add_argument("-OC", "--only-create", action="store_true",  help="Just create the random routes/sequences without creating the dataset")
     parser.add_argument("-F", "--fps", type=int, default=30, help="Output sequence fps (e.g. 30)")
+    parser.add_argument("-SD", "--seed", type=int, default=-1, help="Use a seed for each random")
     args = parser.parse_args()
 
+    logging.info("parsing arguments")
+    if args.seed >= 0: random.seed(args.seed)
     name = args.name
     number_videos = args.number_videos
     if number_videos < 1: log_and_exit("--number-videos must be positive", 1)
-    min_routes = args.min_routes
-    max_routes = args.max_routes
-    if min_routes > max_routes: log_and_exit("--min-routes can't be more than --max-routes", 2)
+    min_pathes_per_routes = args.min_routes
+    max_pathes_per_routes = args.max_routes
+    if min_pathes_per_routes > max_pathes_per_routes: log_and_exit("--min-routes can't be more than --max-routes", 2)
     min_objects = args.min_objects
     max_objects = args.max_objects
     if min_objects > max_objects: log_and_exit("--min-objects can't be more than --max-objects", 3)
@@ -60,110 +137,38 @@ if __name__ == '__main__':
     if duration <= 100: log_and_exit("--duration must be more than 100 ms", 5)
     frame_width = args.width
     frame_height = args.height
-    background = args.background
+    backgrounds = [os.path.join("backgrounds", pa) for pa in os.listdir("backgrounds")]
+    if args.backgrounds != '':
+        backgrounds = parse_list_filenames(args.backgrounds, "backgrounds")
     objects = [os.path.join("patches", pa) for pa in os.listdir("patches")]
     if args.objects != '':
-        objects = []
-        for pa in args.objects.split(','):
-            obj_path = os.path.join("patches", pa)
-            if not os.path.exists(obj_path):
-                obj_path = pa
-                if not os.path.exists(obj_path):
-                    logging.error("Unable to find patch " + pa)
-                    exit(1)
-            objects.append(obj_path)
-
+        objects = parse_list_filenames(args.objects, "patches")
     if len(ratios) != 0 and len(ratios) != len(objects):
         log_and_exit("objects and ratios were given, but they are not same length", 6)
     save_video = args.save_video
-    fps = args.fps
+    framerate = args.fps
     only_create = args.only_create
-
-    logging.info("Starting dataset creation")
 
     all_routes = []
     if args.routes != '':
-        objects = []
-        for ob in args.args.split(','):
-            route_path = os.path.join("routes", ob)
-            if not os.path.exists(route_path):
-                route_path = ob
-                if not os.path.exists(route_path): log_and_exit("Unable to find route " + ob, 7)
-            objects.append(route_path)
+        all_routes = parse_list_filenames(args.routes, "routes")
     else:
-        for i in range(max(number_videos, max_routes)):
-            all_routes = []
-            BASE_DIR_ROUTES = "routes"
-            logging.info("Creating random routes...")
-            instr = random.randint(min_routes, max_routes)
-            route_new = routes_generator(
-                num_instructions=instr,
-                duration=duration,
-                frame_size=(frame_width, frame_height)
-            )
-            route_fn = f"{BASE_DIR_ROUTES}/route_{name}_{i}.txt"
-            with open(route_fn, 'w') as outfile:
-                outfile.writelines(route_new)
-            all_routes.append(route_fn)
+        possible_routes = max(10, number_videos * 2)
+        logging.info(f"Creating {possible_routes} random patches")
+        create_random_routes(possible_routes, min_pathes_per_routes, max_pathes_per_routes)
 
-    BASE_DIR_SEQS = "sequences"
     logging.info("Creating random sequences...")
-    all_sequences = []
-    for i in range(number_videos):
-        num_objs = random.randint(min_objects, max_objects)
-        seq_new = json_generator(
-            num_objects=num_objs,
-            ratios=ratios,
-            routes=all_routes,
-            patches=objects
-        )
-        seq_fn = f"{BASE_DIR_SEQS}/seq_{name}_{i}.json"
-        with open(seq_fn, 'w') as outfile:
-            json.dump(seq_new, outfile, indent=2)
-        all_sequences.append(seq_fn)
+    all_sequences = generate_random_sequences(number_videos, min_objects, max_objects, name, ratios, all_routes, objects)
 
     if only_create:
+        logging.info("Random routes/sequences created.")
         exit(0)
 
-    logging.info("Building videos...")
-    USE_OS = False
+    logging.info("Building datasets...")
     out_dir = f"datasets_out"
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    # create dataset_name_0, if exists dataset_name_1, ....
-    i = 0
-    dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
-    while os.path.exists(dataset_dir):
-        i += 1
-        dataset_dir = os.path.join(out_dir, f"dts_{name}_{i}")
-    for i, seq in enumerate(all_sequences):
-        video_path = None
-        if save_video:
-            video_path = os.path.join(dataset_dir, f"vid{i}.mp4")
-        logging.info("")
-        logging.info(f"Creating {dataset_dir}")
-        if USE_OS:
-            os.system(f"""
-                python3 create_video.py \
-                    --width={frame_width} \
-                    --height={frame_height} \
-                    --background={background} \
-                    --input-json={seq} \
-                    --output-dir={dataset_dir}\
-                    --video={video_path} \
-                    --fps={fps}
-            """)
-        else:
-            from create_video import simulate, parse_background, parse_json
-            np_background = parse_background(background, frame_width, frame_height)
-            instructions = parse_json(seq)
-            simulate(
-                width=frame_width,
-                height=frame_height,
-                background=np_background,
-                instructions=instructions,
-                dataset_dir=dataset_dir,
-                video_out=video_path,
-                fps=fps)
+    dataset_dir = build_next_dataset_dir(out_dir)
+    generate_videos(dataset_dir, all_sequences, frame_width, frame_height, backgrounds, framerate, save_video)
 
     logging.info("Ended dataset creation")
