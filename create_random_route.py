@@ -30,13 +30,18 @@ def generate_number_with_sum(n: int, total: int, min_value: int = 1):
     return values
 
 
-def routes_generator(num_instructions: int, duration: int, frame_size: tuple, min_pause: int = 100, commands: list = None) -> list:
+def routes_generator(num_instructions: int,
+                     duration: int,
+                     frame_size: tuple,
+                     min_pause: int = 100,
+                     commands: list = None) -> list:
     """Generate instruction list.
 
     Args:
         num_instructions(int):
         duration: [ms]
         frame_size: (w,h)
+        min_pause:
         commands(list): list of commands
 
     Returns:
