@@ -66,3 +66,31 @@ services:
               "-MinO", "1",
               "-MaxO", "3",
               "-SV"]
+
+  generate_video:
+    container_name: generate_video
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GENVID_DIR="/genvid"
+    volumes:
+      - type: bind
+        source: ./src
+        target: ${GENVID_DIR}/src
+      - type: bind
+        source: ./sequences
+        target: ${GENVID_DIR}/sequences
+      - type: bind
+        source: ./routes
+        target: ${GENVID_DIR}/routes
+      - type: bind
+        source: ./patches
+        target: ${GENVID_DIR}/patches
+      - type: bind
+        source: ./datasets_out
+        target: ${GENVID_DIR}/datasets_out
+    working_dir: ${GENVID_DIR}
+    command: ["python3", "${GENVID_DIR}/create_video.py",
+              "-I", "sequences/square_pentagon_map.json",
+              "-V", "datasets_out/example.mp4"]
