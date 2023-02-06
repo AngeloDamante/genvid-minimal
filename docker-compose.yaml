@@ -1,0 +1,68 @@
+services:
+  genvid:
+    container_name: genvid
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GENVID_DIR="/genvid"
+    volumes:
+      - type: bind
+        source: ./src
+        target: ${GENVID_DIR}/src
+      - type: bind
+        source: ./sequences
+        target: ${GENVID_DIR}/sequences
+      - type: bind
+        source: ./routes
+        target: ${GENVID_DIR}/routes
+      - type: bind
+        source: ./patches
+        target: ${GENVID_DIR}/patches
+      - type: bind
+        source: ./datasets_out
+        target: ${GENVID_DIR}/datasets_out
+    working_dir: ${GENVID_DIR}
+
+  generate_dataset:
+    container_name: generate_dataset
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - GENVID_DIR="/genvid"
+    volumes:
+      - type: bind
+        source: ./src
+        target: ${GENVID_DIR}/src
+      - type: bind
+        source: ./sequences
+        target: ${GENVID_DIR}/sequences
+      - type: bind
+        source: ./routes
+        target: ${GENVID_DIR}/routes
+      - type: bind
+        source: ./patches
+        target: ${GENVID_DIR}/patches
+      - type: bind
+        source: ./datasets_out
+        target: ${GENVID_DIR}/datasets_out
+    working_dir: ${GENVID_DIR}
+    command: ["python3", "${GENVID_DIR}/generate_random_dataset.py",
+              "--name", "XYZ",
+              "--objects", "circle.png,mcqueen.png,enterprise.png",
+              "-IR", "0.16,0.20|0.03,0.04|0.035,0.045",
+              "--allowed-commands", "const,acc,trap,pause,pause,pause,pause",
+              "-W", "224",
+              "-H", "224",
+              "--number-videos", "10",
+              "--duration", "10",
+              "-MinR", "40",
+              "-MaxR", "50",
+              "-MinI", "3",
+              "-MaxI", "6",
+              "-MinO", "1",
+              "-MaxO", "3",
+              "-SV"]
