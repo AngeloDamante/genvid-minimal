@@ -2,6 +2,33 @@
 
 A minimal video (dataset) generator for OD purposes.
 
+## Layout Directories
+```
+├── datasets_out
+├── patches
+├── routes
+├── sequences
+├── src
+│   ├── BackgroundIterator.py
+│   ├── evolver.py
+│   ├── LoggingManager.py
+│   ├── motion_law.py
+│   ├── MovementType.py
+│   └── simulator.py
+├── test
+├── create_random_route.py
+├── create_random_sequence.py
+├── create_video.py
+├── generate_random_dataset.py
+├── download_sample_backgrounds.sh
+├── run_example_2.sh
+├── run_random_sequence_generator.sh
+├── run_simple_example.sh
+├── Dockerfile
+├── docker-compose.yaml
+├── requirements.txt
+└── README.md
+```
 
 ## Installation
 
