@@ -2,6 +2,7 @@
 
 A minimal video (dataset) generator for OD purposes.
 
+
 ## Installation
 
 ### Virtualenv
@@ -25,9 +26,21 @@ pip install -r requirements.txt
 ```
 
 ### Docker
+Let's set up the image
+```
+mkdir datasets_out
+docker-compose build 
+```
 
-TODO: create docker
+you can work directly in the container with the environment setted or directly run some examples.
+```
+# launch interactive container
+docker-compose run --rm genvid
 
+# launch quick examples  
+docker-compose run --rm generate_video
+docker-compose run --rm generate_dataset
+```
 ## Optional data
 
 if needed, there are some background videos that can be downloaded automatically to *backgrounds* directory using:
@@ -38,7 +51,7 @@ if needed, there are some background videos that can be downloaded automatically
 
 ## Usage
 
-The main script is **create_dataset.py** which uses src/simulator.py to create the dataset sequences.
+The main script is **create_video.py** which uses src/simulator.py to create the dataset sequences.
 
 A simple example can be found by running ` ./run_simple_example.sh `.
 
