@@ -180,20 +180,13 @@ def test_save_patches():
 if __name__ == '__main__':
     configure_logging(log_lvl=logging.DEBUG, log_console=True)
     parser = argparse.ArgumentParser()
-    parser.add_argument("-W", "--width", type=int, default=1280,
-                        help="Dataset frame height (e.g. 1280)")
-    parser.add_argument("-H", "--height", type=int, default=720,
-                        help="Dataset frame width (e.g. 720)")
-    parser.add_argument("-B", "--background", type=str, default='0,0,0',
-                        help="Background like color RGB, filename or video path (e.g. '0,0,255', 'background_1.png' or 'back_vid.mp4')")
-    parser.add_argument("-I", "--input-json", type=str,
-                        required=True, help="json filename for sequence creation")
-    parser.add_argument("-O", "--output-dir", type=str, default="datasets_out",
-                        help="Output directory (e.g. 'datasets_out'")
-    parser.add_argument("-V", "--video", type=str, default=None,
-                        help="Output video file if wanted (e.g. 'out.mp4'")
-    parser.add_argument("-F", "--fps", type=int, default=30,
-                        help="Output sequence fps (e.g. 30)")
+    parser.add_argument("-W", "--width", type=int, default=1280, help="Dataset frame height (e.g. 1280)")
+    parser.add_argument("-H", "--height", type=int, default=720, help="Dataset frame width (e.g. 720)")
+    parser.add_argument("-B", "--background", type=str, default='0,0,0', help="Background like color RGB, filename or video path (e.g. '0,0,255', 'background_1.png' or 'back_vid.mp4')")
+    parser.add_argument("-I", "--input-json", type=str, required=True, help="json filename for sequence creation")
+    parser.add_argument("-O", "--output-dir", type=str, default="datasets_out", help="Output directory (e.g. 'datasets_out'")
+    parser.add_argument("-V", "--video", type=str, default=None, help="Output video file if wanted (e.g. 'out.mp4'")
+    parser.add_argument("-F", "--fps", type=int, default=30, help="Output sequence fps (e.g. 30)")
     args = parser.parse_args()
 
     frame_width = args.width
