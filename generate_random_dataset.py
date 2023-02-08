@@ -175,7 +175,8 @@ if __name__ == '__main__':
         exit(0)
 
     logging.info("Building datasets...")
-    out_dir = f"datasets_out"
+    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    out_dir = os.path.join(__location__, "datasets_out")
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     dataset_dir = build_next_dataset_dir(out_dir)
